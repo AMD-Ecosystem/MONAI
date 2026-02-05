@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import warnings
 from os import path
+from pathlib import Path, PosixPath, WindowsPath
 from typing import Any, cast
 
 import numpy as np
