@@ -7,7 +7,6 @@
     1. [Adding new optional dependencies](#adding-new-optional-dependencies)
     1. [Signing your work](#signing-your-work)
     1. [Utility functions](#utility-functions)
-<<<<<<< HEAD
     1. [Backwards compatibility](#backwards-compatibility)
   - [Submitting pull requests](#submitting-pull-requests)
 - [The code reviewing process (for the maintainers)](#the-code-reviewing-process)
@@ -18,15 +17,6 @@
 ## Introduction
 
 Welcome to Project MONAI! We're excited you're here and want to contribute. This documentation is intended for individuals and institutions interested in contributing to MONAI. MONAI is an open-source project and, as such, its success relies on its community of contributors willing to keep improving it. Your contribution will be a valued addition to the code base; we simply ask that you read this page and understand our contribution process, whether you are a seasoned open-source contributor or whether you are a first-time contributor.
-=======
-  * [Submitting pull requests](#submitting-pull-requests)
-
-
-## Introduction
-
-
-Welcome to Project MONAI for AMD ROCm&trade;! We're excited you're here and want to contribute. This documentation is intended for individuals and institutions interested in contributing to MONAI for AMD ROCm&trade;. MONAI for AMD ROCm&trade; is an open-source project and, as such, its success relies on its community of contributors willing to keep improving it. Your contribution will be a valued addition to the code base; we simply ask that you read this page and understand our contribution process, whether you are a seasoned open-source contributor or whether you are a first-time contributor.
->>>>>>> 85d09c15 (MONAI 1.5.0 for AMD ROCm)
 
 ### Communicate with us
 
