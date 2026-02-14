@@ -61,7 +61,7 @@ git+https://github.com/facebookresearch/segment-anything.git@6fdee8f2727f4506cfb
 onnx_graphsurgeon
 polygraphy
 wheel 
-setuptools
+setuptools<81.0.0
 ITK
 ignite
 pytorch-ignite 

@@ -17,3 +17,4 @@ nvidia_cuda_cupti_cu11==0
 nvidia_cuda_nvrtc_cu11==0
 nvidia_cuda_runtime_cu11==0
 nvidia_cudnn_cu11==0
+setuptools<81.0.0
