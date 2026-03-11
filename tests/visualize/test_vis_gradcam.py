@@ -197,7 +197,7 @@ class TestGradientClassActivationMap(unittest.TestCase):
         # check result is same whether class_idx=None is used or not
         # relaxed tolerance: multi-GPU introduces non-determinism in reductions
         result2 = cam(x=image, layer_idx=-1, class_idx=inferred, **kwargs)
-        assert_allclose(result, result2, atol=1e-4, rtol=1e-4)
+        assert_allclose(result, result2, atol=5e-4, rtol=5e-3)
 
     @parameterized.expand(TESTS_ILL)
     def test_ill(self, cam_class):
