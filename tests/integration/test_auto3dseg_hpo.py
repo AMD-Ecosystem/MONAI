@@ -25,7 +25,12 @@ from monai.bundle.config_parser import ConfigParser
 from monai.data import create_test_image_3d
 from monai.utils import optional_import
 from monai.utils.enums import AlgoKeys
-from tests.test_utils import get_testing_algo_template_path, skip_if_downloading_fails, skip_if_no_cuda
+from tests.test_utils import (
+    SkipIfBeforePyTorchVersion,
+    get_testing_algo_template_path,
+    skip_if_downloading_fails,
+    skip_if_no_cuda,
+)
 
 _, has_tb = optional_import("torch.utils.tensorboard", name="SummaryWriter")
 optuna, has_optuna = optional_import("optuna")
@@ -71,9 +76,17 @@ fake_datalist: dict[str, list[dict]] = {
 }
 
 
+@SkipIfBeforePyTorchVersion((1, 11, 1))
 @unittest.skipIf(not has_tb, "no tensorboard summary writer")
 class TestHPO(unittest.TestCase):
     def setUp(self) -> None:
+        self._orig_cuda_visible = os.environ.get("CUDA_VISIBLE_DEVICES")
+        if self._orig_cuda_visible:
+            gpu_ids = self._orig_cuda_visible.split(",")[:2]
+        else:
+            gpu_ids = [str(i) for i in range(min(2, torch.cuda.device_count()))]
+        os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(gpu_ids)
+
         self.test_dir = tempfile.TemporaryDirectory()
         test_path = self.test_dir.name
 
@@ -114,7 +127,7 @@ class TestHPO(unittest.TestCase):
             "modality": "MRI",
             "datalist": fake_json_datalist,
             "dataroot": dataroot,
-            "multigpu": False,
+            "multigpu": True,
             "class_names": ["label_class"],
         }
 
@@ -177,6 +190,11 @@ class TestHPO(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.test_dir.cleanup()
+        # Restore original CUDA_VISIBLE_DEVICES
+        if self._orig_cuda_visible is not None:
+            os.environ["CUDA_VISIBLE_DEVICES"] = self._orig_cuda_visible
+        else:
+            os.environ.pop("CUDA_VISIBLE_DEVICES", None)
 
 
 if __name__ == "__main__":
