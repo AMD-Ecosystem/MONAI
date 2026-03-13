@@ -8,7 +8,7 @@
 Supported features and limitations
 ===================================
 
-This topic discusses the features and limitations for MONAI 1.0.0 for AMD ROCm.
+This topic discusses the features and limitations for MONAI 1.5.2 for AMD ROCm.
 
 Features
 ---------
@@ -57,29 +57,19 @@ Here are the MONAI for AMD ROCm features:
 
 - Model Zoo with pretrained models
 
-  - Provides access to a wide collection of pretrained models from the `MONAI Model Zoo <https://monai.io/model-zoo.html#/>`_, ready for fine-tuning on custom datasets.
+  - Provides access to a wide collection of pretrained models from the `MONAI Model Zoo <https://project-monai.github.io/model-zoo.html#/>`_, ready for fine-tuning on custom datasets.
 
-  - Facilitates utilizing the `MONAI Bundle format <https://docs.monai.io/en/latest/bundle_intro.html>`_ to easily `get started <https://github.com/Project-MONAI/tutorials/tree/main/model_zoo>`_ on building workflows or integrating new models into your projects.
+  - Facilitates utilizing the `MONAI Bundle format <https://monai.readthedocs.io/en/latest/bundle_intro.html>`_ to easily `get started <https://github.com/Project-MONAI/tutorials/tree/main/model_zoo>`_ on building workflows or integrating new models into your projects.
 
   For more information on Model Zoo, see :ref:`model-zoo`.
 
 Limitations
 ------------
 
-- MONAI for AMD ROCm only supports features from amd-cupy later than 13.5.1 and hipCIM 1.0.00 and later.
+- MONAI for AMD ROCm only supports features from amd-cupy later than 13.5.1 and hipCIM 25.10.00 and later.
 
 - There is no support for:
 
   - GPU direct storage (KvikIO, cuFile).
 
   - rocTX tracing.
-
-- No support for Python earlier than 3.10 and PyTorch earlier than 1.13.1.
-
-- Deprecated transforms such as AddChannel, AsChannelFirst, and others.
-
-- There might not be first-class support for some advanced or rare image file formats and non-NIfTI/DICOM derivatives.
-
-- No support for legacy neural network architectures such as deprecated versions of DynUnet and old TorchVision wrappers.
-
-- Automatic installation of optional dependencies is not available. Some features require explicit installation.
