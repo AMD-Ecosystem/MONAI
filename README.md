@@ -24,19 +24,20 @@ Its ambitions are as follows:
 
 ## Requirements
 
-MONAI for AMD ROCm works with Python 3.10, and depends directly on NumPy and [PyTorch for AMD ROCm](https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/) with many optional dependencies.
+MONAI for AMD ROCm works with Python 3.12, and depends directly on NumPy and [PyTorch for AMD ROCm](https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/) with many optional dependencies.
 * AMD MONAI supports [ROCm-LS/hipCIM](https://rocm.docs.amd.com/projects/hipCIM/en/latest/index.html) for accelerated image loading and processing on AMD Instinct GPUs.
 * See the `requirements*.txt` files for dependency version information.
 
 ## Installation
 
-To install [the current release](https://pypi.amd.com/simple/amd-monai/), you can simply run:
+Install [the current release](https://pypi.amd.com/rocm-7.2/simple/amd-monai/) using pip with the appropriate ROCm index:
 
-```bash
-pip install amd_monai --extra-index-url=https://pypi.amd.com/simple
-```
+| ROCm Version | Install Command |
+|:---:|---|
+| **7.0.2** | `pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-7.0.2/simple/` |
+| **7.2** | `pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-7.2/simple/` |
 
-Please refer to [the installation guide](https://rocm.docs.amd.com/projects/monai/en/latest/install/installation.html) for other installation options.
+For additional options, see the [installation guide](https://rocm.docs.amd.com/projects/monai/en/latest/install/installation.html).
 
 ## Getting Started
 
