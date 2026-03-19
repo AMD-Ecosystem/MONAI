@@ -61,7 +61,7 @@ Here are the MONAI for AMD ROCm features:
 
   - Facilitates utilizing the `MONAI Bundle format <https://monai.readthedocs.io/en/latest/bundle_intro.html>`_ to easily `get started <https://github.com/Project-MONAI/tutorials/tree/main/model_zoo>`_ on building workflows or integrating new models into your projects.
 
-  For more information on Model Zoo, see :ref:`model-zoo`.
+  For more information about the MONAI Model Zoo, see :ref:`model-zoo`.
 
 Limitations
 ------------

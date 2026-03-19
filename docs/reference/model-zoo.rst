@@ -16,7 +16,7 @@ EXAONEPath model (hf_exaonepath-crc-msi-predictor) on ROCm
 -----------------------------------------------------------
 
 EXAONEPath 2.0 is a foundation model designed to deliver highly efficient, directly supervised patch-level representation learning for whole-slide images (WSIs). Except for a few other model zoo entries exclusively designed for NVIDIA, advanced models for computational pathology, such as EXAONEPath 2.0, are now supported on AMD hardware.
-Unlike typical patch-based self-supervised learning (SSL), EXAONE Path 2.0 leverages end-to-end slide-level supervision for powerful biomarker and molecular characteristic prediction with improved data efficiency.
+Unlike typical patch-based self-supervised learning (SSL), EXAONEPath 2.0 leverages end-to-end slide-level supervision for powerful biomarker and molecular characteristic prediction with improved data efficiency.
 
 .. _set-exaonepath:
 
