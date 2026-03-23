@@ -10,7 +10,7 @@ MONAI on ROCm installation
 
 To install MONAI on ROCm, you have the following options:
 
-- :ref:`Using package manager <package-install>` (recommended)
+- :ref:`Use package manager <package-install>` (recommended)
 
 - :ref:`Build from source <source-install>`
 
