@@ -35,7 +35,7 @@ The documentation is structured as follows:
 
   .. grid-item-card:: Install
 
-    * :ref:`Installation <installing-monai>`
+    * :ref:`installing-monai`
 
   .. grid-item-card:: Reference
 
