@@ -1,18 +1,18 @@
 .. meta::
    :description: MONAI is a domain-optimized, open-source framework based on PyTorch, designed specifically for deep learning in healthcare imaging.
-   :keywords: ROCm-LS, life sciences, MONAI for AMD ROCm installation, Build MONAI for AMD ROCm
+   :keywords: ROCm-LS, life sciences, MONAI on ROCm installation, Build MONAI for AMD ROCm
 
 .. _installing-monai:
 
-==============================
-Installing MONAI for AMD ROCm
-==============================
+===========================
+MONAI on ROCm installation
+===========================
 
-This topic discusses how to install MONAI for AMD ROCm using the following options:
+To install MONAI on ROCm, you have the following options:
 
-- :ref:`From source (for developers) <source-install>`
+- :ref:`Using package manager <package-install>` (recommended)
 
-- :ref:`Using package manager (for users) <package-install>`
+- :ref:`Build from source <source-install>`
 
 System requirements
 --------------------
@@ -29,12 +29,12 @@ System requirements
 
 - NumPy version: No earlier than 1.24 and no later than 2.4
 
-For more information about dependencies, see the ``requirements*.txt`` file.
+For the complete list of dependencies, see the `requirements.txt <https://github.com/ROCm-LS/monai/blob/main/requirements.txt>`_ file.
 
 Setting up the environment
 ---------------------------
 
-To set up the environment for installing MONAI for AMD ROCm, follow these steps:
+To set up the environment for MONAI on ROCm installation, follow these steps:
 
 1. Set up the Docker image using the ROCm or Ubuntu Docker image from Docker Hub.
 
@@ -125,29 +125,50 @@ To set up the environment for installing MONAI for AMD ROCm, follow these steps:
       export AMDGPU_TARGETS=gfx942
       export HIP_VISIBLE_DEVICES=0
 
+.. _package-install:
+
+Installing using package manager
+----------------------------------
+
+For MONAI on ROCm installation using a package manager, follow the steps given in this section.
+
+1. Install the optional system dependencies depending on the workload.
+
+   .. code-block:: shell
+
+      pip install ITK nibabel gdown tqdm lmdb psutil pandas einops mlflow \
+                  pynrrd clearml transformers pydicom fire ignite         \
+                  parameterized tensorboard pytorch-ignite onnx
+
+2. Install MONAI on ROCm from the AMD PyPI repository.
+
+   .. code-block:: shell
+
+      pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-${ROCM_SHORT_VERSION}/simple
+
 .. _source-install:
 
-Installing from source
------------------------
+Building from source
+---------------------
 
-To build MONAI for AMD ROCm from source, follow the steps given in this section. This installation method should be used by MONAI for AMD ROCm developers. If you're a MONAI for AMD ROCm user, see :ref:`package-install`.
+To build MONAI on ROCm from source, follow the steps given in this section.
 
-1. Download the latest version of MONAI for AMD ROCm from the GitHub repository.
+1. Download the latest version of MONAI on ROCm from the GitHub repository.
 
    .. code-block:: shell
 
       git clone git@github.com:ROCm-LS/monai.git
       cd monai
 
-2. Create and activate the development environment for building MONAI for AMD ROCm.
+2. Create and activate the development environment for building MONAI on ROCm.
 
    .. code-block:: shell
 
       pip install -r requirements-dev.txt -c amd-constraints.txt --build-constraint amd-constraints.txt
 
-3. Build and install MONAI for AMD ROCm on a ROCm-based AMD system using the development environment.
+3. Build and install MONAI on ROCm on a ROCm-based AMD system using the development environment.
 
-   - To build and install the development version of MONAI for AMD ROCm, use:
+   - To build and install the development version of MONAI on ROCm, use:
 
      .. code-block:: shell
 
@@ -161,33 +182,12 @@ To build MONAI for AMD ROCm from source, follow the steps given in this section.
 
      The preceding command builds the package in non-debug mode and the wheel file is generated under the ``dist`` directory.
 
-.. _package-install:
-
-Installing using package manager
-----------------------------------
-
-To install MONAI for AMD ROCm using a package manager, follow the steps given in this section. This installation method should be used by MONAI for AMD ROCm users. If you're a MONAI for AMD ROCm developer, see :ref:`source-install`
-
-1. Install the optional system dependencies depending on the workload.
-
-   .. code-block:: shell
-
-      pip install ITK nibabel gdown tqdm lmdb psutil pandas einops mlflow \
-                  pynrrd clearml transformers pydicom fire ignite         \
-                  parameterized tensorboard pytorch-ignite onnx
-
-2. Install MONAI for AMD ROCm from the AMD PyPI repository.
-
-   .. code-block:: shell
-
-      pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-${ROCM_SHORT_VERSION}/simple
-
 Verify installation
 --------------------
 
-Use these commands to verify the MONAI for AMD ROCm installation:
+Use these commands to verify the MONAI on ROCm installation:
 
-- Print the MONAI for AMD ROCm version.
+- Print the MONAI on ROCm version.
 
   .. code-block:: shell
 
@@ -195,7 +195,7 @@ Use these commands to verify the MONAI for AMD ROCm installation:
 
    1.5.2
 
-- Print the MONAI for AMD ROCm package info.
+- Print the MONAI on ROCm package info.
 
   .. code-block:: shell
 

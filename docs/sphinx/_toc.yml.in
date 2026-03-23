@@ -19,7 +19,7 @@ subtrees:
 - caption: Related content
   entries:
   - url: https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html
-    title: MONAI blog
+    title: MONAI on ROCm blog
 
 - caption: About
   entries:

@@ -1,6 +1,6 @@
 .. meta::
    :description: MONAI is a domain-optimized, open-source framework based on PyTorch, designed specifically for deep learning in healthcare imaging.
-   :keywords: ROCm-LS, life sciences, MONAI for AMD ROCm features, MONAI for AMD ROCm limitations, MONAI for AMD ROCm known issues
+   :keywords: ROCm-LS, life sciences, MONAI on ROCm features, MONAI on ROCm limitations, MONAI on ROCm known issues
 
 .. _monai-features:
 
@@ -8,18 +8,18 @@
 Supported features and limitations
 ===================================
 
-This topic discusses the features and limitations for MONAI 1.5.2 for AMD ROCm.
+This topic discusses the supported features and limitations of MONAI 1.5.2 on ROCm as compared to the `MONAI upstream version 1.5.2 <https://github.com/Project-MONAI/MONAI/releases/tag/1.5.2>`_.
 
-Features
----------
+Supported features
+-------------------
 
-Here are the MONAI for AMD ROCm features:
+Here are the MONAI on ROCm features:
 
 - Deep learning inference
 
-  - Accelerated inference for MONAI models using AMD ROCm and `HIP <https://rocm.docs.amd.com/projects/HIP/en/latest/>`_ backends.
+  - Accelerated inference for MONAI models using ROCm and `HIP <https://rocm.docs.amd.com/projects/HIP/en/latest/>`_ backends.
 
-  - Supports common MONAI model architectures for segmentation, classification, and registration, along with advanced AI capabilities such as generative models, federated learning, and AutoML.
+  - Supports common MONAI model architectures for segmentation, classification, and registration, as well as advanced AI capabilities such as generative models, federated learning, and AutoML.
 
 - Seamless integration with `hipCIM <https://rocm.docs.amd.com/projects/hipCIM/en/latest/index.html>`_
 
@@ -59,14 +59,14 @@ Here are the MONAI for AMD ROCm features:
 
   - Provides access to a wide collection of pretrained models from the `MONAI Model Zoo <https://project-monai.github.io/model-zoo.html#/>`_, ready for fine-tuning on custom datasets.
 
-  - Facilitates utilizing the `MONAI Bundle format <https://monai.readthedocs.io/en/latest/bundle_intro.html>`_ to easily `get started <https://github.com/Project-MONAI/tutorials/tree/main/model_zoo>`_ on building workflows or integrating new models into your projects.
+  - Facilitates using the `MONAI Bundle format <https://monai.readthedocs.io/en/latest/bundle_intro.html>`_ to easily start building workflows or integrating new models into your projects with the help of `tutorials <https://github.com/Project-MONAI/tutorials/tree/main/model_zoo>`_.
 
   For more information about the MONAI Model Zoo, see :ref:`model-zoo`.
 
 Limitations
 ------------
 
-- MONAI for AMD ROCm only supports features from amd-cupy later than 13.5.1 and hipCIM 25.10.00 and later.
+- MONAI on ROCm only supports features from amd-cupy later than 13.5.1, and hipCIM 25.10.00 and later.
 
 - There is no support for:
 
