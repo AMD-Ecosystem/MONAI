@@ -44,7 +44,7 @@ The documentation is structured as follows:
 
   .. grid-item-card:: Related content
 
-    * `MONAI blog <https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html>`_
+    * `MONAI on ROCm blog <https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html>`_
 
 To contribute to MONAI on ROCm, refer to
 `Contributing to MONAI on ROCm <https://github.com/ROCm-LS/monai/blob/main/CONTRIBUTING.md>`_.
