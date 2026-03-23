@@ -23,9 +23,9 @@ System requirements
 
 - Python version: 3.12
 
-- AMD Instinct GPU: MI355X, MI325X, MI300X
+- AMD Instinct™ GPU: MI355X, MI325X, MI300X
 
-- `PyTorch for AMD ROCm <https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/>`_version: 2.8.0 and later
+- `PyTorch for AMD ROCm <https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/>`_ version: 2.8.0 and later
 
 - NumPy version: No earlier than 1.24 and no later than 2.4
 

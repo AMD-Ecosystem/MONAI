@@ -31,7 +31,7 @@ Here are the MONAI on ROCm features:
 
 - GPU acceleration
 
-  - Leverages AMD Instinct GPUs for high-throughput inference.
+  - Leverages AMD Instinct™ GPUs for high-throughput inference.
 
   - Delivers optimized memory and compute performance for large-scale medical datasets.
 
@@ -66,7 +66,7 @@ Here are the MONAI on ROCm features:
 Limitations
 ------------
 
-- MONAI on ROCm only supports features from amd-cupy later than 13.5.1, and hipCIM 25.10.00 and later.
+- MONAI on ROCm only supports features from amd-cupy 13.5.1 and later, and hipCIM 25.10.00 and later.
 
 - There is no support for:
 
