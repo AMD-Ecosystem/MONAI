@@ -61,7 +61,7 @@ Here are the MONAI on ROCm features:
 
   - Facilitates using the `MONAI Bundle format <https://monai.readthedocs.io/en/latest/bundle_intro.html>`_ to easily start building workflows or integrating new models into your projects with the help of `tutorials <https://github.com/Project-MONAI/tutorials/tree/main/model_zoo>`_.
 
-  For more information about the MONAI Model Zoo, see :ref:`model-zoo`.
+For more information about the MONAI Model Zoo, see :ref:`model-zoo`.
 
 Limitations
 ------------
