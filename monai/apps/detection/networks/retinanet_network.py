@@ -8,6 +8,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
 
 # =========================================================================
 # Adapted from https://github.com/pytorch/vision/blob/main/torchvision/models/detection/retinanet.py

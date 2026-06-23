@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+.. SPDX-License-Identifier: Apache-2.0
+
 .. meta::
   :description: MONAI is a domain-optimized, open-source framework based on PyTorch, designed specifically for deep learning in healthcare imaging.
   :keywords: ROCm-LS, life sciences, MONAI for AMD ROCm documentation, MONAI on ROCm document, AMD MONAI, ROCm MONAI

@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+.. SPDX-License-Identifier: Apache-2.0
+
 .. meta::
    :description: The MONAI Model Zoo is a hub for researchers and data scientists to share, discover, and deploy the latest models from across the biomedical imaging community.
    :keywords: ROCm-LS, life sciences, MONAI model zoo, Pretrained models, MONAI
