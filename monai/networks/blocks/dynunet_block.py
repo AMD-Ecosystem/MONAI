@@ -209,9 +209,13 @@ class UnetUpBlock(nn.Module):
         act_name: tuple | str = ("leakyrelu", {"inplace": True, "negative_slope": 0.01}),
         dropout: tuple | str | float | None = None,
         trans_bias: bool = False,
+        use_gemm_transpose: bool = False,
     ):
         super().__init__()
         upsample_stride = upsample_kernel_size
+        # AMD MI300X: when kernel_size == stride, ConvTranspose3d admits an exact
+        # pixel-shuffle GEMM decomposition which is more efficient 
+        self._use_gemm_transpose = bool(use_gemm_transpose) and torch.version.hip is not None
         self.transp_conv = get_conv_layer(
             spatial_dims,
             in_channels,
@@ -238,9 +242,46 @@ class UnetUpBlock(nn.Module):
 
     def forward(self, inp, skip):
         # number of channels for skip should equals to out_channels
-        out = self.transp_conv(inp)
+        if self._use_gemm_transpose:
+            out = self._transp_conv_gemm(inp)
+        else:
+            out = self.transp_conv(inp)
         out = torch.cat((out, skip), dim=1)
         out = self.conv_block(out)
+        return out
+
+    def _transp_conv_gemm(self, x):
+        """Pixel-shuffle GEMM decomposition of ConvTranspose3d, valid only when
+        kernel_size == stride (zero output-window overlap). Falls through to the
+        stock transposed convolution for any shape that violates the decomposition
+        preconditions (k != s, dilation, output_padding, groups, non-5D input)."""
+        conv = self.transp_conv.conv
+        k = tuple(conv.kernel_size)
+        s = tuple(conv.stride)
+        if (
+            hasattr(self.transp_conv, "adn")  # extra act/norm/dropout layer — decomp covers conv only
+            or k != s
+            or any(d != 1 for d in conv.dilation)
+            or any(p != 0 for p in conv.output_padding)
+            or conv.groups != 1
+            or x.dim() != 5
+        ):
+            return self.transp_conv(x)
+
+        n, ic, d, h, w = x.shape
+        oc = conv.out_channels
+        kd, kh, kw = int(k[0]), int(k[1]), int(k[2])
+
+        x_flat = x.contiguous().permute(0, 2, 3, 4, 1).reshape(n * d * h * w, ic)
+        w_flat = conv.weight.reshape(ic, oc * kd * kh * kw)  # weight: (IC, OC, kD, kH, kW)
+        out_flat = x_flat @ w_flat
+
+        out = out_flat.reshape(n, d, h, w, oc, kd, kh, kw)
+        out = out.permute(0, 4, 1, 5, 2, 6, 3, 7).contiguous()
+        out = out.reshape(n, oc, d * kd, h * kh, w * kw)
+
+        if conv.bias is not None:
+            out = out + conv.bias.view(1, oc, 1, 1, 1)
         return out
 
 

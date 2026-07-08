@@ -185,5 +185,37 @@ class TestDynUNetDeepSupervision(unittest.TestCase):
             self.assertEqual(results.shape, expected_shape)
 
 
+class TestDynUNetGemmTranspose(unittest.TestCase):
+    """AMD MI GPUs: use_gemm_transpose must thread from DynUNet down to every
+    decoder upsample block (this flag is what the ROCm bundle overlay flips)."""
+
+    def test_flag_threaded_to_upsample_blocks(self):
+        net = DynUNet(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=2,
+            kernel_size=[3, 3, 3],
+            strides=[1, 2, 2],
+            upsample_kernel_size=[2, 2],
+            use_gemm_transpose=True,
+        )
+        self.assertTrue(len(net.upsamples) > 0)
+        expected = torch.version.hip is not None
+        for block in net.upsamples:
+            self.assertEqual(block._use_gemm_transpose, expected)
+
+    def test_flag_defaults_off(self):
+        net = DynUNet(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=2,
+            kernel_size=[3, 3, 3],
+            strides=[1, 2, 2],
+            upsample_kernel_size=[2, 2],
+        )
+        for block in net.upsamples:
+            self.assertFalse(block._use_gemm_transpose)
+
+
 if __name__ == "__main__":
     unittest.main()

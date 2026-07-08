@@ -125,6 +125,9 @@ class DynUNet(nn.Module):
         res_block: whether to use residual connection based convolution blocks during the network.
             Defaults to ``False``.
         trans_bias: whether to set the bias parameter in transposed convolution layers. Defaults to ``False``.
+        use_gemm_transpose: AMD MI300X (ROCm) only. Replace the decoder ConvTranspose3d upsamples with
+            an exact pixel-shuffle GEMM decomposition when ``kernel_size == stride``,
+            Defaults to ``False``.
     """
 
     def __init__(
@@ -143,6 +146,7 @@ class DynUNet(nn.Module):
         deep_supr_num: int = 1,
         res_block: bool = False,
         trans_bias: bool = False,
+        use_gemm_transpose: bool = False,
     ):
         super().__init__()
         self.spatial_dims = spatial_dims
@@ -156,6 +160,7 @@ class DynUNet(nn.Module):
         self.dropout = dropout
         self.conv_block = UnetResBlock if res_block else UnetBasicBlock
         self.trans_bias = trans_bias
+        self.use_gemm_transpose = use_gemm_transpose
         if filters is not None:
             self.filters = filters
             self.check_filters()
@@ -319,6 +324,7 @@ class DynUNet(nn.Module):
             UnetUpBlock,  # type: ignore
             upsample_kernel_size,
             trans_bias=self.trans_bias,
+            use_gemm_transpose=self.use_gemm_transpose,
         )
 
     def get_module_list(
@@ -330,6 +336,7 @@ class DynUNet(nn.Module):
         conv_block: nn.Module,
         upsample_kernel_size: Sequence[Sequence[int] | int] | None = None,
         trans_bias: bool = False,
+        use_gemm_transpose: bool = False,
     ):
         layers = []
         if upsample_kernel_size is not None:
@@ -347,6 +354,7 @@ class DynUNet(nn.Module):
                     "dropout": self.dropout,
                     "upsample_kernel_size": up_kernel,
                     "trans_bias": trans_bias,
+                    "use_gemm_transpose": use_gemm_transpose,
                 }
                 layer = conv_block(**params)
                 layers.append(layer)
