@@ -21,7 +21,7 @@ from parameterized import parameterized
 
 from monai.apps import download_url
 from monai.networks import eval_mode
-from monai.networks.nets.swin_unetr import PatchMerging, PatchMergingV2, SwinUNETR, filter_swinunetr
+from monai.networks.nets.swin_unetr import PatchMerging, PatchMergingV2, SwinUNETR, WindowAttention, filter_swinunetr
 from monai.networks.utils import copy_model_state
 from monai.utils import optional_import
 from tests.test_utils import (
@@ -124,6 +124,36 @@ class TestSWINUNETR(unittest.TestCase):
                 dst_dict, loaded, not_loaded = copy_model_state(net, ssl_weight, filter_func=filter_swinunetr)
                 assert_allclose(dst_dict[key][:8], value, atol=1e-4, rtol=1e-4, type_test=False)
                 self.assertTrue(len(loaded) == 157 and len(not_loaded) == 2)
+
+    @skipUnless(has_einops, "Requires einops")
+    def test_window_attention_sdpa(self):
+        """Test WindowAttention SDPA vs explicit attention numerical equivalence."""
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        dim = 96
+        num_heads = 3
+        window_size = (7, 7, 7)
+
+        # Create two WindowAttention blocks with different attention modes
+        attn_sdpa = WindowAttention(dim=dim, num_heads=num_heads, window_size=window_size, use_sdpa=True).to(device)
+        attn_explicit = WindowAttention(dim=dim, num_heads=num_heads, window_size=window_size, use_sdpa=False).to(
+            device
+        )
+
+        # Share weights to ensure only attention mechanism differs
+        attn_explicit.load_state_dict(attn_sdpa.state_dict())
+        attn_sdpa.eval()
+        attn_explicit.eval()
+
+        # Test input
+        b = 2
+        n = window_size[0] * window_size[1] * window_size[2]  # 343
+        x = torch.randn(b, n, dim).to(device)
+
+        with torch.no_grad():
+            out_sdpa = attn_sdpa(x, mask=None)
+            out_explicit = attn_explicit(x, mask=None)
+
+        assert_allclose(out_sdpa, out_explicit, atol=1e-4)
 
 
 if __name__ == "__main__":

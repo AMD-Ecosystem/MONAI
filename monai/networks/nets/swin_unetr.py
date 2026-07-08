@@ -457,6 +457,7 @@ class WindowAttention(nn.Module):
         qkv_bias: bool = False,
         attn_drop: float = 0.0,
         proj_drop: float = 0.0,
+        use_sdpa: bool | None = None,
     ) -> None:
         """
         Args:
@@ -466,6 +467,8 @@ class WindowAttention(nn.Module):
             qkv_bias: add a learnable bias to query, key, value.
             attn_drop: attention dropout rate.
             proj_drop: dropout rate of output.
+            use_sdpa: use fused scaled_dot_product_attention. Defaults to True on ROCm (AMD),
+                False elsewhere. Pass explicitly to override.
         """
 
         super().__init__()
@@ -523,31 +526,53 @@ class WindowAttention(nn.Module):
         self.proj_drop = nn.Dropout(proj_drop)
         trunc_normal_(self.relative_position_bias_table, std=0.02)
         self.softmax = nn.Softmax(dim=-1)
+        if use_sdpa is None:
+            use_sdpa = torch.version.hip is not None and hasattr(F, "scaled_dot_product_attention")
+        self._use_sdpa: bool = use_sdpa
 
     def forward(self, x, mask):
         b, n, c = x.shape
         qkv = self.qkv(x).reshape(b, n, 3, self.num_heads, c // self.num_heads).permute(2, 0, 3, 1, 4)
         q, k, v = qkv[0], qkv[1], qkv[2]
-        q = q * self.scale
-        attn = q @ k.transpose(-2, -1)
-        relative_position_bias = self.relative_position_bias_table[
-            self.relative_position_index.clone()[:n, :n].reshape(-1)  # type: ignore[operator]
-        ].reshape(n, n, -1)
-        relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous()
-        attn = attn + relative_position_bias.unsqueeze(0)
+
+        bias = (
+            self.relative_position_bias_table[
+                self.relative_position_index.clone()[:n, :n].reshape(-1)  # type: ignore[operator]
+            ]
+            .reshape(n, n, -1)
+            .permute(2, 0, 1)
+            .contiguous()
+            .unsqueeze(0)
+        )  # (1, num_heads, n, n)
+
+        if self._use_sdpa:
+            out = self._attn_sdpa(q, k, v, bias, mask, b, n)
+        else:
+            out = self._attn_explicit(q, k, v, bias, mask, b, n)
+
+        return self.proj_drop(self.proj(out.transpose(1, 2).reshape(b, n, c)))
+
+    def _attn_explicit(self, q, k, v, bias, mask, b, n):
+        attn = q * self.scale @ k.transpose(-2, -1) + bias
         if mask is not None:
             nw = mask.shape[0]
             attn = attn.view(b // nw, nw, self.num_heads, n, n) + mask.unsqueeze(1).unsqueeze(0)
             attn = attn.view(-1, self.num_heads, n, n)
-            attn = self.softmax(attn)
-        else:
-            attn = self.softmax(attn)
+        return self.attn_drop(self.softmax(attn)).to(v.dtype) @ v
 
-        attn = self.attn_drop(attn).to(v.dtype)
-        x = (attn @ v).transpose(1, 2).reshape(b, n, c)
-        x = self.proj(x)
-        x = self.proj_drop(x)
-        return x
+    def _attn_sdpa(self, q, k, v, bias, mask, b, n):
+        if mask is not None:
+            nw = mask.shape[0]
+            attn_mask = (
+                (bias.unsqueeze(0) + mask.view(1, nw, 1, n, n))
+                .expand(b // nw, nw, self.num_heads, n, n)
+                .reshape(b, self.num_heads, n, n)
+                .to(q.dtype)
+            )
+        else:
+            attn_mask = bias.to(q.dtype)
+        drop_p = self.attn_drop.p if self.training else 0.0
+        return F.scaled_dot_product_attention(q, k, v, attn_mask=attn_mask, dropout_p=drop_p, scale=self.scale)
 
 
 class SwinTransformerBlock(nn.Module):
