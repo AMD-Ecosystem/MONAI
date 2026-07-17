@@ -8,6 +8,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
 
 from __future__ import annotations
 
@@ -375,6 +376,10 @@ class DiNTS(nn.Module):
             self.node_a = torch.ones((self.num_blocks + 1, self.num_depths))
         else:
             self.node_a = node_a
+        # Cache as plain Python ints so forward branches are constant-foldable by
+        # torch.compile (branching on a tensor element causes a graph break; a Python
+        # int list does not). node_a is immutable post-construction on the inference path.
+        self._node_a_py = self.node_a.int().tolist()
 
         # define stem operations for every block
         conv_type = Conv[Conv.CONV, spatial_dims]
@@ -493,7 +498,7 @@ class DiNTS(nn.Module):
             # allow multi-resolution input
             _mod_w: StemInterface = self.stem_down[str(d)]  # type: ignore[assignment]
             x_out = _mod_w.forward(x)
-            if self.node_a[0][d]:
+            if self._node_a_py[0][d]:
                 inputs.append(x_out)
             else:
                 inputs.append(torch.zeros_like(x_out))
@@ -507,7 +512,7 @@ class DiNTS(nn.Module):
             _mod_up: StemInterface = self.stem_up[str(res_idx)]  # type: ignore[assignment]
             if start:
                 _temp = _mod_up.forward(outputs[res_idx] + _temp)
-            elif self.node_a[blk_idx + 1][res_idx]:
+            elif self._node_a_py[blk_idx + 1][res_idx]:
                 start = True
                 _temp = _mod_up.forward(outputs[res_idx])
         prediction = self.stem_finals(_temp)
@@ -610,6 +615,9 @@ class TopologyConstruction(nn.Module):
 
         self.arch_code_a = arch_code_a
         self.arch_code_c = arch_code_c
+        # Cache as plain Python ints so TopologyInstance.forward branches are
+        # constant-foldable by torch.compile. arch_code_a is immutable post-construction.
+        self._arch_code_a_py = self.arch_code_a.int().tolist()
         # define cell operation on each path
         self.cell_tree = nn.ModuleDict()
         for blk_idx in range(self.num_blocks):
@@ -675,7 +683,7 @@ class TopologyInstance(TopologyConstruction):
         inputs = x
         for blk_idx in range(self.num_blocks):
             outputs = [torch.tensor(0.0, dtype=x[0].dtype, device=x[0].device)] * self.num_depths
-            for res_idx, activation in enumerate(self.arch_code_a[blk_idx].data):
+            for res_idx, activation in enumerate(self._arch_code_a_py[blk_idx]):
                 if activation:
                     mod: CellInterface = self.cell_tree[str((blk_idx, res_idx))]  # type: ignore[assignment]
                     _out = mod.forward(x=inputs[self.arch_code2in[res_idx]], weight=None)
