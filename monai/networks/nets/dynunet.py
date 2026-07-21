@@ -8,6 +8,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
 
 # isort: dont-add-import: from __future__ import annotations
 
@@ -146,7 +147,7 @@ class DynUNet(nn.Module):
         deep_supr_num: int = 1,
         res_block: bool = False,
         trans_bias: bool = False,
-        use_gemm_transpose: bool = False,
+        use_gemm_transpose: bool = True,
     ):
         super().__init__()
         self.spatial_dims = spatial_dims
@@ -225,12 +226,32 @@ class DynUNet(nn.Module):
 
             return DynUNetSkipLayer(index, downsample=downsamples[0], upsample=upsamples[0], next_layer=next_layer)
 
+        self._create_skips = create_skips
         if not self.deep_supervision:
             self.skip_layers = create_skips(
                 0, [self.input_block] + list(self.downsamples), self.upsamples[::-1], self.bottleneck
             )
         else:
             self.skip_layers = create_skips(
+                0,
+                [self.input_block] + list(self.downsamples),
+                self.upsamples[::-1],
+                self.bottleneck,
+                superheads=self.deep_supervision_heads,
+            )
+
+    def enable_gemm_transpose(self, enable: bool = True) -> None:
+        """Enable or disable GEMM-based ConvTranspose3d upsamples post-construction (AMD MI300X / ROCm)."""
+        if self.use_gemm_transpose == enable:
+            return
+        self.use_gemm_transpose = enable
+        self.upsamples = self.get_upsamples()
+        if not self.deep_supervision:
+            self.skip_layers = self._create_skips(
+                0, [self.input_block] + list(self.downsamples), self.upsamples[::-1], self.bottleneck
+            )
+        else:
+            self.skip_layers = self._create_skips(
                 0,
                 [self.input_block] + list(self.downsamples),
                 self.upsamples[::-1],
