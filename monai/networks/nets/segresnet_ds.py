@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import copy
 from collections.abc import Callable
-from typing import Union
 
 import numpy as np
 import torch
@@ -236,7 +235,7 @@ class SegResNetDS(nn.Module):
     """
     SegResNetDS based on `3D MRI brain tumor segmentation using autoencoder regularization
     <https://arxiv.org/pdf/1810.11654.pdf>`_.
-    It is similar to https://docs.monai.io/en/stable/networks.html#segresnet, with several
+    It is similar to https://monai.readthedocs.io/en/stable/networks.html#segresnet, with several
     improvements including deep supervision and non-isotropic kernel support.
 
     Args:
@@ -254,6 +253,20 @@ class SegResNetDS(nn.Module):
         resolution: optional input image resolution. When provided, the network will first use non-isotropic kernels to bring
                     image spacing into an approximately isotropic space.
                     Otherwise, by default, the kernel size and downsampling is always isotropic.
+
+                    **Spatial shape constraints**: If ``resolution`` is ``None`` (isotropic mode),
+                    each spatial dimension must be divisible by ``2 ** (len(blocks_down) - 1)``.
+                    With the default ``blocks_down=(1, 2, 2, 4)``, each dimension must be
+                    divisible by 8. If ``resolution`` is provided (anisotropic mode),
+                    divisibility can differ per dimension; use :py:meth:`shape_factor` for
+                    the exact required factors and :py:meth:`is_valid_shape` to verify a shape.
+
+                    Example::
+
+                        model = SegResNetDS(spatial_dims=3, blocks_down=(1, 2, 2, 4))
+                        print(model.shape_factor())  # [8, 8, 8]
+                        print(model.is_valid_shape((1, 1, 128, 128, 128)))  # True
+                        print(model.is_valid_shape((1, 1, 100, 100, 100)))  # False
 
     """
 
@@ -388,7 +401,7 @@ class SegResNetDS(nn.Module):
         a = [i % j == 0 for i, j in zip(x.shape[2:], self.shape_factor())]
         return all(a)
 
-    def _forward(self, x: torch.Tensor) -> Union[None, torch.Tensor, list[torch.Tensor]]:
+    def _forward(self, x: torch.Tensor) -> None | torch.Tensor | list[torch.Tensor]:
         if self.preprocess is not None:
             x = self.preprocess(x)
 
@@ -424,7 +437,7 @@ class SegResNetDS(nn.Module):
         # return a list of DS outputs
         return outputs
 
-    def forward(self, x: torch.Tensor) -> Union[None, torch.Tensor, list[torch.Tensor]]:
+    def forward(self, x: torch.Tensor) -> None | torch.Tensor | list[torch.Tensor]:
         return self._forward(x)
 
 
@@ -485,7 +498,7 @@ class SegResNetDS2(SegResNetDS):
 
     def forward(  # type: ignore
         self, x: torch.Tensor, with_point: bool = True, with_label: bool = True
-    ) -> tuple[Union[None, torch.Tensor, list[torch.Tensor]], Union[None, torch.Tensor, list[torch.Tensor]]]:
+    ) -> tuple[None | torch.Tensor | list[torch.Tensor], None | torch.Tensor | list[torch.Tensor]]:
         """
         Args:
             x: input tensor.

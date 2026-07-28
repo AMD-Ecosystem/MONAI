@@ -11,6 +11,7 @@
 """
 A collection of "vanilla" transforms for IO functions.
 """
+
 from __future__ import annotations
 
 import inspect
@@ -19,10 +20,9 @@ import logging
 import sys
 import traceback
 import warnings
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from pydoc import locate
-from typing import Callable
 
 import numpy as np
 import torch
@@ -282,7 +282,7 @@ class LoadImage(Transform):
             raise RuntimeError(
                 f"{self.__class__.__name__} cannot find a suitable reader for file: {filename}.\n"
                 "    Please install the reader libraries, see also the installation instructions:\n"
-                "    https://docs.monai.io/en/latest/installation.html#installing-the-recommended-dependencies.\n"
+                "    https://monai.readthedocs.io/en/latest/installation.html#installing-the-recommended-dependencies.\n"
                 f"   The current registered: {self.readers}.\n{msg}"
             )
         img_array: NdarrayOrTensor
@@ -299,7 +299,7 @@ class LoadImage(Transform):
             img_array, meta_data, self.simple_keys, pattern=self.pattern, sep=self.sep
         )
         if self.ensure_channel_first:
-            img = EnsureChannelFirst()(img)
+            img = EnsureChannelFirst()(img, meta_dict=meta_data)
         if self.image_only:
             return img
         return img, img.meta if isinstance(img, MetaTensor) else meta_data
@@ -519,7 +519,7 @@ class SaveImage(Transform):
         raise RuntimeError(
             f"{self.__class__.__name__} cannot find a suitable writer for {filename}.\n"
             "    Please install the writer libraries, see also the installation instructions:\n"
-            "    https://docs.monai.io/en/latest/installation.html#installing-the-recommended-dependencies.\n"
+            "    https://monai.readthedocs.io/en/latest/installation.html#installing-the-recommended-dependencies.\n"
             f"   The current registered writers for {self.output_ext}: {self.writers}.\n{msg}"
         )
 
