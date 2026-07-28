@@ -565,6 +565,15 @@ class MONAIEnvVars:
     def testing_algo_template() -> str | None:
         return os.environ.get("MONAI_TESTING_ALGO_TEMPLATE", None)
 
+    @staticmethod
+    def allow_pickle() -> bool:
+        """If true, Auto3DSeg algo (de)serialization may use pickle. Default False.
+
+        Pickle can execute arbitrary code on load and should only be enabled for files
+        from trusted sources. Prefer ``algo_to_json`` / ``algo_from_json``.
+        """
+        return str2bool(os.environ.get("MONAI_ALLOW_PICKLE", "0"))
+
 
 class ImageMetaKey:
     """
@@ -879,7 +888,12 @@ def run_cmd(cmd_list: list[str], **kwargs: Any) -> subprocess.CompletedProcess:
         a CompletedProcess instance after the command completes.
     """
     debug = MONAIEnvVars.debug()
-    kwargs["capture_output"] = kwargs.get("capture_output", debug)
+    # Always capture output when check=True so that error details are available
+    # in the CalledProcessError exception for debugging subprocess failures.
+    if kwargs.get("check", False):
+        kwargs.setdefault("capture_output", True)
+    else:
+        kwargs["capture_output"] = kwargs.get("capture_output", debug)
 
     if kwargs.pop("run_cmd_verbose", False):
         import monai
@@ -888,11 +902,9 @@ def run_cmd(cmd_list: list[str], **kwargs: Any) -> subprocess.CompletedProcess:
     try:
         return subprocess.run(cmd_list, **kwargs)
     except subprocess.CalledProcessError as e:
-        if not debug:
-            raise
-        output = str(e.stdout.decode(errors="replace"))
-        errors = str(e.stderr.decode(errors="replace"))
-        raise RuntimeError(f"subprocess call error {e.returncode}: {errors}, {output}.") from e
+        output = str(e.stdout.decode(errors="replace")) if e.stdout else ""
+        errors = str(e.stderr.decode(errors="replace")) if e.stderr else ""
+        raise RuntimeError(f"subprocess call error {e.returncode}: {errors}, {output}") from e
 
 
 def is_sqrt(num: Sequence[int] | int) -> bool:

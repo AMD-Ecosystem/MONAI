@@ -8,6 +8,11 @@ docs/
 .gitignore
 .github/
 
+# Type/lint caches
+.mypy_cache
+.ruff_cache
+.pytype
+
 # Coverage & test artifacts
 .coverage
 .coverage.*
@@ -37,6 +42,5 @@ test.zarr/
 
 # Config files not needed in image
 .readthedocs.yml
-*.toml
 
 !README.md

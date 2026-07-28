@@ -25,6 +25,7 @@ from tests.test_utils import test_onnx_save as _test_onnx_save
 from tests.test_utils import test_script_save as _test_script_save
 
 _, has_torchvision = optional_import("torchvision")
+_, has_onnxruntime = optional_import("onnxruntime")
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 num_anchors = 7
@@ -141,7 +142,7 @@ class TestRetinaNet(unittest.TestCase):
     def test_script(self, model, input_param, input_shape):
         try:
             idx = int(self.id().split("test_script_")[-1])
-        except BaseException:
+        except Exception:
             idx = 0
         idx %= 3
         # test whether support torchscript
@@ -171,10 +172,11 @@ class TestRetinaNet(unittest.TestCase):
             _test_script_save(net, data, rtol=2e-2, atol=1e-5)
 
     @parameterized.expand(TEST_CASES_TS)
+    @unittest.skipUnless(has_onnxruntime, "onnxruntime not installed")
     def test_onnx(self, model, input_param, input_shape):
         try:
             idx = int(self.id().split("test_onnx_")[-1])
-        except BaseException:
+        except Exception:
             idx = 0
         idx %= 3
         # test whether support torchscript
