@@ -204,7 +204,7 @@ class TestDynUNetGemmTranspose(unittest.TestCase):
         for block in net.upsamples:
             self.assertEqual(block._use_gemm_transpose, expected)
 
-    def test_flag_defaults_off(self):
+    def test_flag_defaults_on(self):
         net = DynUNet(
             spatial_dims=3,
             in_channels=1,
@@ -214,7 +214,7 @@ class TestDynUNetGemmTranspose(unittest.TestCase):
             upsample_kernel_size=[2, 2],
         )
         for block in net.upsamples:
-            self.assertFalse(block._use_gemm_transpose)
+            self.assertTrue(block._use_gemm_transpose)
 
 
 if __name__ == "__main__":
