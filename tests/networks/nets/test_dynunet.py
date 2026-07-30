@@ -213,8 +213,9 @@ class TestDynUNetGemmTranspose(unittest.TestCase):
             strides=[1, 2, 2],
             upsample_kernel_size=[2, 2],
         )
+        expected = torch.version.hip is not None
         for block in net.upsamples:
-            self.assertTrue(block._use_gemm_transpose)
+            self.assertEqual(block._use_gemm_transpose, expected)
 
 
 if __name__ == "__main__":

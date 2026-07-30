@@ -127,8 +127,8 @@ class DynUNet(nn.Module):
             Defaults to ``False``.
         trans_bias: whether to set the bias parameter in transposed convolution layers. Defaults to ``False``.
         use_gemm_transpose: AMD MI300X (ROCm) only. Replace the decoder ConvTranspose3d upsamples with
-            an exact pixel-shuffle GEMM decomposition when ``kernel_size == stride``,
-            Defaults to ``False``.
+            an exact pixel-shuffle GEMM decomposition when ``kernel_size == stride``.
+            Defaults to ``True`` (effective only on ROCm builds; a no-op elsewhere).
     """
 
     def __init__(
@@ -226,7 +226,6 @@ class DynUNet(nn.Module):
 
             return DynUNetSkipLayer(index, downsample=downsamples[0], upsample=upsamples[0], next_layer=next_layer)
 
-        self._create_skips = create_skips
         if not self.deep_supervision:
             self.skip_layers = create_skips(
                 0, [self.input_block] + list(self.downsamples), self.upsamples[::-1], self.bottleneck
@@ -241,23 +240,16 @@ class DynUNet(nn.Module):
             )
 
     def enable_gemm_transpose(self, enable: bool = True) -> None:
-        """Enable or disable GEMM-based ConvTranspose3d upsamples post-construction (AMD MI300X / ROCm)."""
-        if self.use_gemm_transpose == enable:
-            return
+        """Enable or disable GEMM-based ConvTranspose3d upsamples post-construction (AMD MI300X / ROCm).
+
+        Toggles the runtime gate on the existing upsample blocks; it does not rebuild any modules,
+        so trained/loaded weights are preserved. The GEMM path is an exact decomposition of the same
+        ConvTranspose3d weights, and is effective only on ROCm builds.
+        """
         self.use_gemm_transpose = enable
-        self.upsamples = self.get_upsamples()
-        if not self.deep_supervision:
-            self.skip_layers = self._create_skips(
-                0, [self.input_block] + list(self.downsamples), self.upsamples[::-1], self.bottleneck
-            )
-        else:
-            self.skip_layers = self._create_skips(
-                0,
-                [self.input_block] + list(self.downsamples),
-                self.upsamples[::-1],
-                self.bottleneck,
-                superheads=self.deep_supervision_heads,
-            )
+        gate = bool(enable) and torch.version.hip is not None
+        for block in self.upsamples:
+            block._use_gemm_transpose = gate
 
     def check_kernel_stride(self):
         kernels, strides = self.kernel_size, self.strides

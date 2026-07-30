@@ -242,7 +242,7 @@ class UnetUpBlock(nn.Module):
 
     def forward(self, inp, skip):
         # number of channels for skip should equals to out_channels
-        if self._use_gemm_transpose:
+        if not torch.jit.is_scripting() and self._use_gemm_transpose:
             out = self._transp_conv_gemm(inp)
         else:
             out = self.transp_conv(inp)
@@ -250,6 +250,7 @@ class UnetUpBlock(nn.Module):
         out = self.conv_block(out)
         return out
 
+    @torch.jit.unused
     def _transp_conv_gemm(self, x):
         """Pixel-shuffle GEMM decomposition of ConvTranspose3d, valid only when
         kernel_size == stride (zero output-window overlap). Falls through to the
