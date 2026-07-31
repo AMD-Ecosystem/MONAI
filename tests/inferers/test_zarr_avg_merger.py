@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import os
+import sys
 import unittest
 from tempfile import TemporaryDirectory
 
@@ -194,12 +195,14 @@ TEST_CASE_12_CHUNKS = [
     TENSOR_4x4,
 ]
 
-# Define zarr v3 codec configurations with proper bytes codec
-ZARR_V3_LZ4_CODECS = [{"name": "bytes", "configuration": {}}, {"name": "blosc", "configuration": {"cname": "lz4"}}]
+# Define zarr v3 codec configurations with proper bytes codec.
+# Derive endian from the platform so these work on big-endian systems too.
+_ENDIAN = "little" if sys.byteorder == "little" else "big"
+ZARR_V3_LZ4_CODECS = [{"name": "bytes", "configuration": {"endian": _ENDIAN}}, {"name": "blosc", "configuration": {"cname": "lz4"}}]
 
-ZARR_V3_PICKLE_CODECS = [{"name": "bytes", "configuration": {}}, {"name": "blosc", "configuration": {"cname": "zstd"}}]
+ZARR_V3_PICKLE_CODECS = [{"name": "bytes", "configuration": {"endian": _ENDIAN}}, {"name": "blosc", "configuration": {"cname": "zstd"}}]
 
-ZARR_V3_LZMA_CODECS = [{"name": "bytes", "configuration": {}}, {"name": "blosc", "configuration": {"cname": "zlib"}}]
+ZARR_V3_LZMA_CODECS = [{"name": "bytes", "configuration": {"endian": _ENDIAN}}, {"name": "blosc", "configuration": {"cname": "zlib"}}]
 
 # test for LZ4 compressor (zarr v2) or codecs (zarr v3)
 TEST_CASE_13_COMPRESSOR_LZ4 = [
@@ -289,7 +292,7 @@ TEST_CASE_18_CODECS = [
 TEST_CASE_19_VALUE_CODECS = [
     dict(
         merged_shape=TENSOR_4x4.shape,
-        value_codecs=[{"name": "bytes", "configuration": {}}, {"name": "blosc", "configuration": {"cname": "zstd"}}],
+        value_codecs=[{"name": "bytes", "configuration": {"endian": _ENDIAN}}, {"name": "blosc", "configuration": {"cname": "zstd"}}],
     ),
     [
         (TENSOR_4x4[..., :2, :2], (0, 0)),
@@ -304,7 +307,7 @@ TEST_CASE_19_VALUE_CODECS = [
 TEST_CASE_20_COUNT_CODECS = [
     dict(
         merged_shape=TENSOR_4x4.shape,
-        count_codecs=[{"name": "bytes", "configuration": {}}, {"name": "blosc", "configuration": {"cname": "zlib"}}],
+        count_codecs=[{"name": "bytes", "configuration": {"endian": _ENDIAN}}, {"name": "blosc", "configuration": {"cname": "zlib"}}],
     ),
     [
         (TENSOR_4x4[..., :2, :2], (0, 0)),

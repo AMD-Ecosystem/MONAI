@@ -237,8 +237,8 @@ class ZarrAvgMerger(Merger):
             For zarr v3, this is a list of codec configurations. See zarr documentation for details.
         count_codecs: the codecs for sample counting zarr array. Default is None.
             For zarr v3, this is a list of codec configurations. See zarr documentation for details.
-        chunks : int or tuple of ints that defines the chunk shape, or boolean. Default is True.
-            If True, chunk shape will be guessed from `shape` and `dtype`.
+        chunks : int or tuple of ints that defines the chunk shape, or "auto". Default is "auto".
+            If "auto" or True, chunk shape will be guessed from `shape` and `dtype`.
             If False, it will be set to `shape`, i.e., single chunk for the whole array.
             If an int, the chunk size in each dimension will be given by the value of `chunks`.
     """
@@ -276,7 +276,7 @@ class ZarrAvgMerger(Merger):
         codecs: list | None = None,
         value_codecs: list | None = None,
         count_codecs: list | None = None,
-        chunks: Sequence[int] | bool = True,
+        chunks: Sequence[int] | int | bool | str = "auto",
         thread_locking: bool = True,
     ) -> None:
         super().__init__(merged_shape=merged_shape, cropped_shape=cropped_shape)
@@ -307,7 +307,8 @@ class ZarrAvgMerger(Merger):
             self.value_store = zarr.storage.TempStore() if value_store is None else value_store  # type: ignore
             self.count_store = zarr.storage.TempStore() if count_store is None else count_store  # type: ignore
 
-        self.chunks = chunks
+        # zarr 3.x empty/zeros only accept None, int, or tuple — not True or "auto"
+        self.chunks = None if chunks is True or chunks == "auto" else chunks
 
         # Handle compressor/codecs based on zarr version
         is_zarr_v3 = version_geq(get_package_version("zarr"), "3.0.0")
