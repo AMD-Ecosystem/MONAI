@@ -1,2 +1,5 @@
+# Core runtime deps. Torch must be pre-installed from the appropriate index
+# (ROCm or CUDA); setup.py adds device extras and rocm pin dynamically at
+# wheel build time.
 torch>=2.8.0
 numpy>=1.24,<2.5

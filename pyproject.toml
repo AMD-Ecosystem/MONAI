@@ -1,4 +1,5 @@
 [build-system]
+# Build with --no-build-isolation to use pre-installed ROCm torch.
 requires = [
   "wheel",
   "setuptools",
