@@ -607,6 +607,11 @@ class WSIReaderTests:
         @parameterized.expand([TEST_CASE_ERROR_0C, TEST_CASE_ERROR_1C, TEST_CASE_ERROR_2C, TEST_CASE_ERROR_3D])
         @skipUnless(has_tiff, "Requires tifffile.")
         def test_read_malformats(self, img_expected):
+            is_hip = torch.version.hip is not None
+            cucim_ver = tuple(int(x) for x in getattr(cucim, "__version__", "0.0.0").split(".")[:3])
+            if self.backend == "cucim" and is_hip and cucim_ver >= (26, 6, 0):
+                # hipCIM >=26.06.00 handles these formats via a slow-path fallback
+                return
             if self.backend == "cucim" and (len(img_expected.shape) < 3 or img_expected.shape[2] == 1):
                 # Until cuCIM addresses https://github.com/rapidsai/cucim/issues/230
                 return

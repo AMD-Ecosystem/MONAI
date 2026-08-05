@@ -129,7 +129,8 @@ fi
 
 function check_import {
     echo "Python: "${PY_EXE}""
-    ${cmdPrefix}"${PY_EXE}" -W error -W ignore::DeprecationWarning -W ignore::ResourceWarning -c "import monai"
+    # TODO: remove FutureWarning ignore once torch.jit.interface usage is dropped from dints.py
+    ${cmdPrefix}"${PY_EXE}" -W error -W ignore::DeprecationWarning -W ignore::ResourceWarning -W ignore::FutureWarning -c "import monai"
 }
 
 function print_version {
