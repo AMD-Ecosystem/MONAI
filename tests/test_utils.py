@@ -878,6 +878,10 @@ def test_local_inversion(invertible_xform, to_invert, im, dict_key=None):
 def command_line_tests(cmd, copy_env=True):
     test_env = os.environ.copy() if copy_env else os.environ
     print(f"CUDA_VISIBLE_DEVICES in {__file__}", test_env.get("CUDA_VISIBLE_DEVICES"))
+    # On ROCm the runtime aborts when HIP_VISIBLE_DEVICES and CUDA_VISIBLE_DEVICES expose
+    # different devices; HIP_VISIBLE_DEVICES takes precedence, so drop the conflicting var.
+    if test_env.get("HIP_VISIBLE_DEVICES") and "CUDA_VISIBLE_DEVICES" in test_env:
+        test_env = {k: v for k, v in test_env.items() if k != "CUDA_VISIBLE_DEVICES"}
     try:
         normal_out = subprocess.run(cmd, env=test_env, check=True, capture_output=True)
         print(repr(normal_out).replace("\\n", "\n").replace("\\t", "\t"))
