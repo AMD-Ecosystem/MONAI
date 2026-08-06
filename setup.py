@@ -8,12 +8,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
 
 from __future__ import annotations
 
 import glob
 import os
 import re
+import subprocess
 import sys
 import warnings
 from typing import Any, cast
@@ -22,6 +24,73 @@ from packaging import version
 from setuptools import find_packages, setup
 
 import versioneer
+
+# ---------- ROCm detection (hipCIM-style) ----------
+
+DEFAULT_ROCM_SERIES = "7.14"
+DEFAULT_GPU_ARCHS = ("gfx942", "gfx950")
+
+
+def _run(cmd):
+    """stdout of ``cmd``, or "" if it is missing or fails."""
+    try:
+        return subprocess.run(cmd, capture_output=True, text=True, check=False).stdout
+    except OSError:
+        return ""
+
+
+def _installed_rocm_version():
+    """MAJOR.MINOR from the installed rocm or rocm-sdk-core package, or ""."""
+    try:
+        from importlib.metadata import version as pkg_version
+        ver = pkg_version("rocm")
+        match = re.match(r"(\d+\.\d+)", ver)
+        return match.group(1) if match else ""
+    except Exception:
+        return ""
+
+
+def _detect_rocm_series():
+    """ROCm MAJOR.MINOR for the torch[device] and rocm pin. First match wins:
+    MONAI_ROCM_SERIES env var, installed rocm package, rocm-sdk CLI, hipcc,
+    else DEFAULT_ROCM_SERIES.
+    """
+    for text, pattern in (
+        (os.environ.get("MONAI_ROCM_SERIES", ""), r"(\d+\.\d+)"),
+        (_installed_rocm_version(), r"(\d+\.\d+)"),
+        (_run(["rocm-sdk", "version"]), r"(\d+\.\d+)"),
+        (_run(["hipcc", "--version"]), r"HIP version:\s*(\d+\.\d+)"),
+    ):
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1)
+    return DEFAULT_ROCM_SERIES
+
+
+def _detect_gpu_archs():
+    """AMD GPU architectures for torch[device-gfx*] extras. Reads GPU_TARGETS /
+    AMDGPU_TARGETS env vars; falls back to DEFAULT_GPU_ARCHS.
+    """
+    raw = os.environ.get("GPU_TARGETS") or os.environ.get("AMDGPU_TARGETS", "")
+    archs = []
+    for match in re.findall(r"gfx[0-9a-f]+", raw, re.IGNORECASE):
+        arch = match.lower()
+        if arch not in archs:
+            archs.append(arch)
+    return archs or list(DEFAULT_GPU_ARCHS)
+
+
+def _rocm_install_requires():
+    """Generate dynamic install_requires for ROCm: torch with device extras and
+    a rocm version pin so the resolver picks the correct ROCm build.
+    """
+    rocm_series = _detect_rocm_series()
+    gpu_archs = _detect_gpu_archs()
+    device_extras = ",".join(f"device-{arch}" for arch in gpu_archs)
+    return [
+        f"torch[{device_extras}]>=2.8.0",
+        f"rocm>={rocm_series}.0a0,<{int(rocm_series.split('.')[0])}.{int(rocm_series.split('.')[1]) + 1}",
+    ]
 
 # TODO: debug mode -g -O0, compile test cases
 
@@ -46,6 +115,11 @@ try:
         raise AssertionError("unknown torch version")
     TORCH_VERSION = int(_pt_version[0]) * 10000 + int(_pt_version[1]) * 100 + int(_pt_version[2])
 except (ImportError, TypeError, AssertionError, AttributeError) as e:
+    if RUN_BUILD:
+        raise RuntimeError(
+            f"torch is required to build MONAI C extensions but could not be imported: {e}\n"
+            "Install ROCm torch first, then build with: pip install --no-build-isolation -e ."
+        ) from e
     warnings.warn(f"extension build skipped: {e}")
 finally:
     if not RUN_BUILD:
@@ -162,4 +236,5 @@ setup(
     zip_safe=False,
     package_data=cast(Any, {"monai": ["py.typed", *jit_extension_source]}),
     ext_modules=get_extensions(),
+    install_requires=_rocm_install_requires() + ["numpy>=1.24,<2.5"],
 )
