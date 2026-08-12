@@ -158,22 +158,22 @@ class TestGradientClassActivationMap(unittest.TestCase):
             model = DenseNet121(spatial_dims=2, in_channels=1, out_channels=3)
         elif input_data["model"] == "densenet2d_bin":
             model = DenseNet(spatial_dims=2, in_channels=1, out_channels=1)
-        # elif input_data["model"] == "densenet3d": # MIOpen backward pass issue
-        #     model = DenseNet(
-        #         spatial_dims=3, in_channels=1, out_channels=3, init_features=2, growth_rate=2, block_config=(6,)
-        #     )
-        # elif input_data["model"] == "densenet3d_bin":
-        #     model = DenseNet(
-        #         spatial_dims=3, in_channels=1, out_channels=1, init_features=2, growth_rate=2, block_config=(6,)
-        #     )
+        elif input_data["model"] == "densenet3d":
+            model = DenseNet(
+                spatial_dims=3, in_channels=1, out_channels=3, init_features=2, growth_rate=2, block_config=(6,)
+            )
+        elif input_data["model"] == "densenet3d_bin":
+            model = DenseNet(
+                spatial_dims=3, in_channels=1, out_channels=1, init_features=2, growth_rate=2, block_config=(6,)
+            )
         elif input_data["model"] == "senet2d":
             model = SEResNet50(spatial_dims=2, in_channels=3, num_classes=4)
         elif input_data["model"] == "senet2d_bin":
             model = SEResNet50(spatial_dims=2, in_channels=3, num_classes=1)
-        # elif input_data["model"] == "senet3d": # MIOpen backward pass issue
-        #     model = SEResNet50(spatial_dims=3, in_channels=3, num_classes=4)
-        # elif input_data["model"] == "senet3d_bin":
-        #     model = SEResNet50(spatial_dims=3, in_channels=3, num_classes=1)
+        elif input_data["model"] == "senet3d":
+            model = SEResNet50(spatial_dims=3, in_channels=3, num_classes=4)
+        elif input_data["model"] == "senet3d_bin":
+            model = SEResNet50(spatial_dims=3, in_channels=3, num_classes=1)
         elif input_data["model"] == "adjoint":
             model = DenseNetAdjoint(spatial_dims=2, in_channels=1, out_channels=3)
 
