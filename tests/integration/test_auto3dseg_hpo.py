@@ -107,8 +107,21 @@ class TestHPO(unittest.TestCase):
         fake_json_datalist = os.path.join(dataroot, "fake_input.json")
         ConfigParser.export_config_file(fake_datalist, fake_json_datalist)
 
-        da = DataAnalyzer(fake_json_datalist, dataroot, output_path=da_output_yaml)
-        da.get_all_case_stats()
+        # DataAnalyzer.get_all_case_stats() uses forkserver multiprocessing when it
+        # detects >1 GPU, but forkserver cannot be started inside a unittest runner
+        # (no __main__ guard). This test is single-GPU (multigpu=False) so restrict
+        # visibility to 1 GPU for data analysis only.
+        # Upstream issue: https://github.com/Project-MONAI/MONAI/issues/7238
+        orig_cvd = os.environ.get("CUDA_VISIBLE_DEVICES", None)
+        os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+        try:
+            da = DataAnalyzer(fake_json_datalist, dataroot, output_path=da_output_yaml)
+            da.get_all_case_stats()
+        finally:
+            if orig_cvd is None:
+                os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+            else:
+                os.environ["CUDA_VISIBLE_DEVICES"] = orig_cvd
 
         data_src = {
             "name": "fake_data",
