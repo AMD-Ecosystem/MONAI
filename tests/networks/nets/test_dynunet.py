@@ -217,6 +217,41 @@ class TestDynUNetGemmTranspose(unittest.TestCase):
         for block in net.upsamples:
             self.assertEqual(block._use_gemm_transpose, expected)
 
+    def test_enable_gemm_transpose_toggles_blocks_in_place(self):
+        # Start disabled, then flip the runtime gate on/off and confirm it
+        # propagates to every existing upsample block without rebuilding them.
+        net = DynUNet(
+            spatial_dims=3,
+            in_channels=1,
+            out_channels=2,
+            kernel_size=[3, 3, 3],
+            strides=[1, 2, 2],
+            upsample_kernel_size=[2, 2],
+            use_gemm_transpose=False,
+        )
+        self.assertTrue(len(net.upsamples) > 0)
+        # capture identities to prove the toggle mutates in place (no rebuild)
+        block_ids = [id(b) for b in net.upsamples]
+        weight_ids = [id(b.transp_conv.conv.weight) for b in net.upsamples]
+        for block in net.upsamples:
+            self.assertFalse(block._use_gemm_transpose)
+
+        # gate is effective only on ROCm builds
+        on_gate = torch.version.hip is not None
+        net.enable_gemm_transpose(True)
+        self.assertTrue(net.use_gemm_transpose)
+        self.assertEqual([id(b) for b in net.upsamples], block_ids)
+        self.assertEqual([id(b.transp_conv.conv.weight) for b in net.upsamples], weight_ids)
+        for block in net.upsamples:
+            self.assertEqual(block._use_gemm_transpose, on_gate)
+
+        net.enable_gemm_transpose(False)
+        self.assertFalse(net.use_gemm_transpose)
+        self.assertEqual([id(b) for b in net.upsamples], block_ids)
+        self.assertEqual([id(b.transp_conv.conv.weight) for b in net.upsamples], weight_ids)
+        for block in net.upsamples:
+            self.assertFalse(block._use_gemm_transpose)
+
 
 if __name__ == "__main__":
     unittest.main()

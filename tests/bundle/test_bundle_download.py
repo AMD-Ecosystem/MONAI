@@ -487,5 +487,18 @@ class TestNgcBundleDownload(unittest.TestCase):
                 )
 
 
+class TestDownloadNgcPrivateValidation(unittest.TestCase):
+    """AMD: `ngc_private` source with no repo and NGC_ORG unset must fail with a
+    clear error instead of silently falling back to the public model-zoo."""
+
+    def test_ngc_private_without_org_raises(self):
+        with tempfile.TemporaryDirectory() as tempdir, patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("NGC_ORG", None)
+            os.environ.pop("NGC_TEAM", None)
+            with self.assertRaises(ValueError) as ctx:
+                download(name="test_bundle", source="ngc_private", bundle_dir=tempdir)
+            self.assertIn("NGC_ORG", str(ctx.exception))
+
+
 if __name__ == "__main__":
     unittest.main()
