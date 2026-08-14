@@ -8,6 +8,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
 
 from __future__ import annotations
 
@@ -108,7 +109,12 @@ class ProbMapProducer:
         locs = engine.state.batch[CommonKeys.IMAGE].meta[ProbMapKeys.LOCATION]
         probs = engine.state.output[self.prob_key]
         for name, loc, prob in zip(names, locs, probs):
-            self.prob_map[name][tuple(loc)] = prob
+            idx = tuple(int(x) for x in loc)
+            try:
+                value = float(prob)
+            except (TypeError, ValueError):
+                value = float(np.asarray(prob).item())
+            self.prob_map[name][idx] = value
             with self.lock:
                 self.counter[name] -= 1
                 if self.counter[name] == 0:
