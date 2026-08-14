@@ -8,6 +8,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modifications Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
 """
 A collection of dictionary-based wrappers around the "vanilla" transforms for box operations
 defined in :py:class:`monai.apps.detection.transforms.array`.
@@ -17,6 +18,7 @@ Class names are ended with 'd' to denote dictionary-based transforms.
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Hashable, Mapping, Sequence
 from copy import deepcopy
 from typing import Any
@@ -528,6 +530,8 @@ class RandZoomBoxd(RandomizableTransform, MapTransform, InvertibleTransform):
             It also can be a sequence of bool or None, each element corresponds to a key in ``keys``.
         keep_size: Should keep original size (pad if needed), default is True.
         allow_missing_keys: don't raise exception if key is missing.
+        label_keys: Deprecated. This parameter is no longer used and will be removed in a future release.
+            Passing it emits a ``DeprecationWarning`` and has no effect.
         kwargs: other args for `np.pad` API, note that `np.pad` treats channel dimension as the first dimension.
             more details: https://numpy.org/doc/1.18/reference/generated/numpy.pad.html
     """
@@ -547,8 +551,16 @@ class RandZoomBoxd(RandomizableTransform, MapTransform, InvertibleTransform):
         align_corners: Sequence[bool | None] | bool | None = None,
         keep_size: bool = True,
         allow_missing_keys: bool = False,
+        label_keys: KeysCollection | None = None,
         **kwargs: Any,
     ) -> None:
+        if label_keys is not None:
+            warnings.warn(
+                "`label_keys` is no longer a parameter of `RandZoomBoxd` and will be ignored. "
+                "Please remove it from your transform configuration.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         self.image_keys = ensure_tuple(image_keys)
         self.box_keys = ensure_tuple(box_keys)
         MapTransform.__init__(self, self.image_keys + self.box_keys, allow_missing_keys)
