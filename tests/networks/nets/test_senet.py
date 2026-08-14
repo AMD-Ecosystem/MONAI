@@ -15,7 +15,7 @@ import os
 import unittest
 from pathlib import Path
 from typing import TYPE_CHECKING
-from unittest import skipUnless
+from unittest import mock, skipUnless
 
 import torch
 from parameterized import parameterized
@@ -145,6 +145,30 @@ class TestPretrainedSENET(unittest.TestCase):
         # we use nn.Linear as the FC layer, but Cadene's version uses
         # a conv layer with kernel size equals to 1. It may bring a little difference.
         self.assertTrue(torch.allclose(result, expected_result, rtol=1e-5, atol=1e-5))
+
+
+class TestSenetPretrainedRetry(unittest.TestCase):
+    """AMD: `_load_state_dict` retries corrupted pretrained-weight downloads
+    (clearing the cached file each time) and re-raises other errors immediately."""
+
+    def test_corrupted_download_retries_then_reraises(self):
+        dummy = torch.nn.Module()
+        with mock.patch.object(
+            se_mod, "load_state_dict_from_url", side_effect=RuntimeError("unexpected EOF while downloading")
+        ) as dl, mock.patch("os.path.exists", return_value=True), mock.patch("os.remove") as rm:
+            with self.assertRaises(RuntimeError):
+                se_mod._load_state_dict(dummy, "se_resnet50", progress=False)
+        self.assertEqual(dl.call_count, 3)  # retried up to max_retries
+        self.assertEqual(rm.call_count, 3)  # cleared the corrupted cache before each retry
+
+    def test_non_corrupted_error_not_retried(self):
+        dummy = torch.nn.Module()
+        with mock.patch.object(
+            se_mod, "load_state_dict_from_url", side_effect=RuntimeError("connection refused")
+        ) as dl:
+            with self.assertRaises(RuntimeError):
+                se_mod._load_state_dict(dummy, "se_resnet50", progress=False)
+        self.assertEqual(dl.call_count, 1)  # non-corrupted -> no retry
 
 
 if __name__ == "__main__":
