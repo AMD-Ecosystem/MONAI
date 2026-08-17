@@ -531,7 +531,7 @@ class RandZoomBoxd(RandomizableTransform, MapTransform, InvertibleTransform):
         keep_size: Should keep original size (pad if needed), default is True.
         allow_missing_keys: don't raise exception if key is missing.
         label_keys: Deprecated. This parameter is no longer used and will be removed in a future release.
-            Passing it emits a ``DeprecationWarning`` and has no effect.
+            Passing it emits a ``FutureWarning`` and has no effect.
         kwargs: other args for `np.pad` API, note that `np.pad` treats channel dimension as the first dimension.
             more details: https://numpy.org/doc/1.18/reference/generated/numpy.pad.html
     """
