@@ -382,7 +382,7 @@ class DiNTS(nn.Module):
         # Cache as plain Python ints so forward branches are constant-foldable by
         # torch.compile (branching on a tensor element causes a graph break; a Python
         # int list does not). node_a is immutable post-construction on the inference path.
-        self._node_a_py = self.node_a.int().tolist()
+        self._node_a_py = torch.as_tensor(self.node_a).int().tolist()
 
         # define stem operations for every block
         conv_type = Conv[Conv.CONV, spatial_dims]
