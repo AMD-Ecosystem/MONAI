@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 import warnings
-from os import path
+from os import environ, path
 from pathlib import Path, PosixPath, WindowsPath
 from typing import Any, cast
 
@@ -43,6 +43,33 @@ if optional_import("yaml")[1]:
 
 tqdm, has_tqdm = optional_import("tqdm", "4.47.0", min_version, "tqdm")
 logger = get_logger(module_name=__name__)
+
+
+def _effective_gpu_count() -> int:
+    """
+    Number of GPUs actually usable for multiprocessing data analysis.
+
+    ``torch.cuda.device_count()`` is cached at first call and, on ROCm, reflects
+    ``HIP_VISIBLE_DEVICES`` while ignoring ``CUDA_VISIBLE_DEVICES``. When a caller
+    restricts visibility via ``CUDA_VISIBLE_DEVICES`` (or the two disagree), the
+    cached count can exceed the truly-visible devices; spawning that many workers
+    then makes the ROCm runtime abort the child on a fatal HIP/CUDA visibility
+    conflict. Take the most restrictive of the visibility hints so we never spawn
+    more workers than devices the user intended to expose.
+    """
+    # Sentinel values that mean "no GPUs" in CUDA/ROCm convention.
+    _NO_GPU_SENTINELS = {"-1", "nogpufiles", "nodevfiles"}
+
+    count = torch.cuda.device_count()
+    for var in ("HIP_VISIBLE_DEVICES", "CUDA_VISIBLE_DEVICES", "ROCR_VISIBLE_DEVICES"):
+        value = environ.get(var)
+        if value is None or value.strip() == "":
+            continue
+        tokens = [t.strip() for t in value.split(",") if t.strip()]
+        if any(t.lower() in _NO_GPU_SENTINELS for t in tokens):
+            return 0
+        count = min(count, len(tokens))
+    return count
 
 __all__ = ["DataAnalyzer"]
 
@@ -209,7 +236,7 @@ class DataAnalyzer:
             nprocs = 1
             logger.info("Using CPU for data analyzing!")
         else:
-            nprocs = torch.cuda.device_count()
+            nprocs = _effective_gpu_count()
             logger.info(f"Found {nprocs} GPUs for data analyzing!")
         if nprocs > 1:
             tmp_ctx: Any = get_context("forkserver")
