@@ -77,7 +77,7 @@ To set up the environment for MONAI on ROCm installation, follow these steps:
    .. code-block:: shell
 
       pip install --upgrade pip
-      pip install amd-hipcim --extra-index-url=https://pypi.amd.com/rocm-7.2.0/simple/
+      pip install amd-hipcim --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple/
 
 4. Set the environment variables. ROCm ships as a pip package in this image, so
    ``ROCM_PATH`` points at the ROCm SDK inside the virtual environment rather than
@@ -92,7 +92,7 @@ To set up the environment for MONAI on ROCm installation, follow these steps:
       # TheRock splits runtime libraries across the core and libraries trees (plus
       # nested subdirs); the math libraries that CuPy loads live in the latter.
       export LD_LIBRARY_PATH=$ROCM_PATH/lib:$ROCM_PATH/lib/rocm_sysdeps/lib:$ROCM_PATH/lib/llvm/lib:$ROCM_LIBRARIES_PATH/lib:$LD_LIBRARY_PATH
-      export AMDGPU_TARGETS=gfx942
+      export AMDGPU_TARGETS="gfx942;gfx950"
       export HIP_VISIBLE_DEVICES=0
 
 .. _package-install:
@@ -114,7 +114,7 @@ For MONAI on ROCm installation using a package manager, follow the steps given i
 
    .. code-block:: shell
 
-      pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-7.2.0/simple
+      pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple/
 
 .. _source-install:
 
@@ -147,7 +147,7 @@ To build MONAI on ROCm from source, follow the steps given in this section.
       rocm-sdk init
       export ROCM_DEVEL_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel
       export PYTORCH_ROCM_ARCH=$AMDGPU_TARGETS
-      export CPATH=$ROCM_DEVEL_PATH/include:$CPATH
+      export CPATH=$ROCM_DEVEL_PATH/include:/usr/lib/gcc/x86_64-linux-gnu/13/include:$CPATH
       export LIBRARY_PATH=$ROCM_DEVEL_PATH/lib:$ROCM_PATH/lib
       # clang expects device bitcode under $ROCM_PATH/amdgcn/bitcode
       mkdir -p $ROCM_PATH/amdgcn

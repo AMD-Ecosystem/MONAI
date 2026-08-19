@@ -56,6 +56,12 @@ ENV AMDGPU_TARGETS=${AMDGPU_TARGETS}
 # HIP device-library lookup fails, so pin it to the same targets.
 ENV PYTORCH_ROCM_ARCH=${AMDGPU_TARGETS}
 
+# AMD PyPI index for amd-hipcim and amd-monai wheels. Torch is served from a
+# separate index (repo.amd.com/rocm/whl-multi-arch) and is already installed in
+# the base image, so this ARG only governs AMD-built Python packages.
+# Switch to rocm-10.0.0 (or later) once that index goes live.
+ARG AMD_PIP_INDEX="https://pypi.amd.com/rocm-10.0.0/simple/"
+
 # PyTorch is preinstalled in the base venv — do not install it here.
 # Install amd-hipcim (digital-pathology I/O; provides the `cucim` module) and the
 # MONAI development requirements. hipCIM is pulled from the AMD pip index; the
@@ -63,14 +69,19 @@ ENV PYTORCH_ROCM_ARCH=${AMDGPU_TARGETS}
 COPY ./requirements*.txt /tmp/
 COPY ./amd-constraints.txt /tmp/
 
+# Expose the ROCm devel headers (rocThrust/rocPRIM/hipCUB via _rocm_sdk_devel) to
+# the HIP compile, plus the gcc-13 include path workaround for CuPy.
+ENV CPATH="/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel/include:/usr/lib/gcc/x86_64-linux-gnu/13/include"
+
 RUN pip install --no-cache-dir --upgrade pip wheel && \
-    pip install --no-cache-dir amd-hipcim --extra-index-url=https://pypi.amd.com/rocm-7.2.0/simple/ && \
+    pip install --no-cache-dir amd-hipcim --extra-index-url="${AMD_PIP_INDEX}" && \
     python3 -c "import cucim; print('hipCIM (cucim) OK:', cucim.__version__)" && \
-    pip install --no-cache-dir -r /tmp/requirements-dev.txt -c /tmp/amd-constraints.txt --build-constraint /tmp/amd-constraints.txt
+    pip install --no-cache-dir -r /tmp/requirements-dev.txt -c /tmp/amd-constraints.txt
 
 # The runtime base ships no ROCm devel headers (rocThrust/rocPRIM/hipCUB), which
-# the from-source HIP compile needs. Install the devel SDK and expand its tree
-# (rocm-sdk init links the device files into _rocm_sdk_devel).
+# the from-source HIP compile needs. rocm-sdk-devel comes from the ROCm/torch
+# wheel index (repo.amd.com/rocm/whl-multi-arch), not from AMD_PIP_INDEX which
+# hosts amd-monai/amd-hipcim. rocm-sdk init expands the devel tree on disk.
 RUN pip install --no-cache-dir "rocm-sdk-devel==7.14.0" --extra-index-url=https://repo.amd.com/rocm/whl-multi-arch/ && \
     rocm-sdk init
 
@@ -79,10 +90,6 @@ COPY . /monai
 WORKDIR /monai
 
 RUN git config --global --add safe.directory /monai
-
-# Expose the ROCm devel headers (rocThrust/rocPRIM/hipCUB via _rocm_sdk_devel) to
-# the HIP compile, plus the gcc-13 include path workaround for CuPy.
-ENV CPATH="/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel/include:/usr/lib/gcc/x86_64-linux-gnu/13/include"
 
 # Build MONAI from source (editable install). Use --no-build-isolation so the
 # build sees the base image's pre-installed ROCm torch; isolation would pull a
