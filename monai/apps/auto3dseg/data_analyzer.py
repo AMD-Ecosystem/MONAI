@@ -57,12 +57,18 @@ def _effective_gpu_count() -> int:
     conflict. Take the most restrictive of the visibility hints so we never spawn
     more workers than devices the user intended to expose.
     """
+    # Sentinel values that mean "no GPUs" in CUDA/ROCm convention.
+    _NO_GPU_SENTINELS = {"-1", "nogpufiles", "nodevfiles"}
+
     count = torch.cuda.device_count()
     for var in ("HIP_VISIBLE_DEVICES", "CUDA_VISIBLE_DEVICES", "ROCR_VISIBLE_DEVICES"):
         value = environ.get(var)
-        if value is not None and value.strip() != "":
-            visible = len([token for token in value.split(",") if token.strip() != ""])
-            count = min(count, visible)
+        if value is None or value.strip() == "":
+            continue
+        tokens = [t.strip() for t in value.split(",") if t.strip()]
+        if any(t.lower() in _NO_GPU_SENTINELS for t in tokens):
+            return 0
+        count = min(count, len(tokens))
     return count
 
 __all__ = ["DataAnalyzer"]
