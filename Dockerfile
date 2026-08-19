@@ -9,114 +9,87 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG BASE_IMAGE=rocm/dev-ubuntu-24.04:7.2-complete
+# ROCm 7.14 base with PyTorch and Python 3.12 preinstalled. This is a TheRock
+# image: ROCm ships as pip packages under the venv's _rocm_sdk_core (no /opt/rocm),
+# and torch/torchvision/torchaudio are already installed. To install PyTorch on a
+# different base, see:
+#   https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html
+ARG BASE_IMAGE=rocm/pytorch:rocm7.14_ubuntu24.04_py3.12_pytorch_release_2.12.0
 FROM ${BASE_IMAGE}
 
-# Install compilers & dependencies
-RUN apt-get update                                                        &&  \
-    apt-get install -y software-properties-common lsb-release gnupg wget  &&  \
-    apt-key adv --fetch-keys                                                  \
-                  https://apt.kitware.com/keys/kitware-archive-latest.asc &&  \
-    add-apt-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" && \
-    apt-get update && \
+# Base already provides build-essential, cmake, ninja, git and gcc-13. Reinstall
+# build-essential explicitly (the Triton AMD backend JIT-compiles HIP kernels at
+# runtime and needs the toolchain) and add the imaging dev libraries MONAI needs.
+RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    build-essential git gcc g++ cmake \
-    ninja-build yasm python3-venv \
+    build-essential git cmake ninja-build yasm \
     openssh-client \
-    libopenslide-dev libwebp-dev \
-    libzstd-dev && \
+    libopenslide-dev libwebp-dev libzstd-dev && \
     rm -rf /var/lib/apt/lists/*
 
-ENV ROCM_HOME="/opt/rocm"
+# ROCm is a pip package in this base (no /opt/rocm). Point the build at the pip
+# SDK so torch's HIP extension compiler (hipcc) and the HIP headers are found,
+# and expose its lib dir at runtime.
+ENV ROCM_PATH="/opt/venv/lib/python3.12/site-packages/_rocm_sdk_core"
+ENV ROCM_HOME="${ROCM_PATH}"
+ENV ROCM_DEVEL_PATH="/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel"
+ENV ROCM_LIBRARIES_PATH="/opt/venv/lib/python3.12/site-packages/_rocm_sdk_libraries"
+ENV PATH="${ROCM_PATH}/bin:/opt/venv/bin:${PATH}"
+# TheRock splits runtime libs across core + libraries (+ nested subdirs); the
+# math libs (libhipblas etc.) that cupy loads live in the libraries tree.
+ENV LD_LIBRARY_PATH="${ROCM_PATH}/lib:${ROCM_PATH}/lib/rocm_sysdeps/lib:${ROCM_PATH}/lib/llvm/lib:${ROCM_LIBRARIES_PATH}/lib:${LD_LIBRARY_PATH}"
+# Link time (unlike LD_LIBRARY_PATH) resolves via LIBRARY_PATH. The unversioned
+# lib*.so dev symlinks (e.g. libamdhip64.so) only exist in the devel tree.
+ENV LIBRARY_PATH="${ROCM_DEVEL_PATH}/lib:${ROCM_PATH}/lib"
 
-# Install amdgpu-install package, then amdgpu-lib for mesa-amdgpu-va-drivers, then rocjpeg
-# Auto-detects ROCm version from /opt/rocm/.info/version and Ubuntu codename from lsb_release
-# URL pattern: https://repo.radeon.com/amdgpu-install/{VERSION}/ubuntu/{CODENAME}/amdgpu-install_{VERSION}.{VERNUM}-1_all.deb
-# where VERSION = MAJOR.MINOR if patch=0, else MAJOR.MINOR.PATCH (e.g., 7.2 or 7.0.2)
-# where VERNUM = major*10000 + minor*100 + patch (e.g., 7.2.0 -> 70200, 7.0.2 -> 70002)
-RUN if ! dpkg -s amdgpu-install >/dev/null 2>&1; then \
-        rm -f /etc/apt/sources.list.d/amdgpu.list /etc/apt/sources.list.d/rocm.list && \
-        ROCM_VERSION=$(cat /opt/rocm/.info/version) && \
-        UBUNTU_CODENAME=$(lsb_release -cs) && \
-        echo "Detected ROCm version: ${ROCM_VERSION}, Ubuntu codename: ${UBUNTU_CODENAME}" && \
-        MAJOR=$(echo ${ROCM_VERSION} | cut -d. -f1) && \
-        MINOR=$(echo ${ROCM_VERSION} | cut -d. -f2) && \
-        PATCH=$(echo ${ROCM_VERSION} | cut -d. -f3) && \
-        PATCH=${PATCH:-0} && \
-        VERNUM=$((MAJOR * 10000 + MINOR * 100 + PATCH)) && \
-        if [ "${PATCH}" = "0" ]; then SHORT_VERSION="${MAJOR}.${MINOR}"; else SHORT_VERSION="${MAJOR}.${MINOR}.${PATCH}"; fi && \
-        AMDGPU_URL="https://repo.radeon.com/amdgpu-install/${SHORT_VERSION}/ubuntu/${UBUNTU_CODENAME}/amdgpu-install_${SHORT_VERSION}.${VERNUM}-1_all.deb" && \
-        echo "Downloading: ${AMDGPU_URL}" && \
-        wget "${AMDGPU_URL}" -O amdgpu-install.deb && \
-        apt-get update && \
-        DEBIAN_FRONTEND=noninteractive apt-get install -y ./amdgpu-install.deb && \
-        rm amdgpu-install.deb; \
-    else \
-        echo "amdgpu-install already present, skipping install"; \
-    fi && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends amdgpu-lib && \
-    apt-get install -y --no-install-recommends rocjpeg rocjpeg-dev && \
-    rm -rf /var/lib/apt/lists/*
+# clang locates ROCm device bitcode at ${ROCM_PATH}/amdgcn/bitcode, but this
+# TheRock SDK ships it under lib/llvm/amdgcn/bitcode. Once ROCM_PATH is set,
+# clang trusts it and fails the HIP device-library lookup without this symlink.
+RUN mkdir -p "${ROCM_PATH}/amdgcn" && \
+    ln -sf "${ROCM_PATH}/lib/llvm/amdgcn/bitcode" "${ROCM_PATH}/amdgcn/bitcode"
 
-# Create virtual environment first
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+# GPU arch(s) for the from-source HIP device codegen (overridable via --build-arg).
+ARG AMDGPU_TARGETS="gfx942;gfx950"
+ENV AMDGPU_TARGETS=${AMDGPU_TARGETS}
+# torch's HIP extension build reads PYTORCH_ROCM_ARCH (not AMDGPU_TARGETS) to emit
+# --offload-arch. Unset, a GPU-less build container yields an empty arch and the
+# HIP device-library lookup fails, so pin it to the same targets.
+ENV PYTORCH_ROCM_ARCH=${AMDGPU_TARGETS}
 
-# Install PyTorch with ROCm support (version-dependent index URL)
-# Detects PyTorch version from setup.cfg if available
-COPY ./setup.cfg /tmp/
-RUN echo "========================================" && \
-    echo "Detecting PyTorch version..." && \
-    echo "========================================" && \
-    SETUP_FILE="/tmp/setup.cfg" && \
-    if [ -f "${SETUP_FILE}" ]; then \
-        TORCH_VERSION_RAW=$(grep -oP 'torch[<=]=\K[0-9]+\.[0-9]+\.[0-9]+' "${SETUP_FILE}" 2>/dev/null | head -1); \
-        if [ -n "${TORCH_VERSION_RAW}" ]; then \
-            TORCH_VERSION="${TORCH_VERSION_RAW}"; \
-            echo "✓ Detected PyTorch version from setup.cfg: ${TORCH_VERSION}"; \
-        else \
-            echo "⚠ No torch version found in setup.cfg, will use latest"; \
-            TORCH_VERSION=""; \
-        fi; \
-    else \
-        echo "⚠ setup.cfg not found, will use latest PyTorch"; \
-        TORCH_VERSION=""; \
-    fi && \
-    ROCM_MINOR_VERSION=$(cat /opt/rocm/.info/version | cut -d. -f2) && \
-    if [ "${ROCM_MINOR_VERSION}" -ge 1 ]; then \
-        PYTORCH_INDEX_URL="https://download.pytorch.org/whl/rocm7.1"; \
-    else \
-        PYTORCH_INDEX_URL="https://download.pytorch.org/whl/rocm7.0"; \
-    fi && \
-    echo "Using PyTorch index URL: ${PYTORCH_INDEX_URL}" && \
-    if [ -n "${TORCH_VERSION}" ]; then \
-        echo "Installing torch==${TORCH_VERSION} torchvision"; \
-        pip install --no-cache-dir "torch==${TORCH_VERSION}" torchvision --index-url "${PYTORCH_INDEX_URL}"; \
-    else \
-        echo "Installing latest torch torchvision"; \
-        pip install --no-cache-dir torch torchvision --index-url "${PYTORCH_INDEX_URL}"; \
-    fi
-
-# Install development requirements and amd-hipcim
+# PyTorch is preinstalled in the base venv — do not install it here.
+# Install amd-hipcim (digital-pathology I/O; provides the `cucim` module) and the
+# MONAI development requirements. hipCIM is pulled from the AMD pip index; the
+# import guard fails the build loudly if only the name-reservation stub resolves.
 COPY ./requirements*.txt /tmp/
 COPY ./amd-constraints.txt /tmp/
 
 RUN pip install --no-cache-dir --upgrade pip wheel && \
-    pip install --no-cache-dir amd-hipcim --extra-index-url=https://pypi.amd.com/rocm-7.0.2/simple/ && \
+    pip install --no-cache-dir amd-hipcim --extra-index-url=https://pypi.amd.com/rocm-7.2.0/simple/ && \
+    python3 -c "import cucim; print('hipCIM (cucim) OK:', cucim.__version__)" && \
     pip install --no-cache-dir -r /tmp/requirements-dev.txt -c /tmp/amd-constraints.txt --build-constraint /tmp/amd-constraints.txt
 
-COPY . /monai 
+# The runtime base ships no ROCm devel headers (rocThrust/rocPRIM/hipCUB), which
+# the from-source HIP compile needs. Install the devel SDK and expand its tree
+# (rocm-sdk init links the device files into _rocm_sdk_devel).
+RUN pip install --no-cache-dir "rocm-sdk-devel==7.14.0" --extra-index-url=https://repo.amd.com/rocm/whl-multi-arch/ && \
+    rocm-sdk init
+
+COPY . /monai
 
 WORKDIR /monai
 
 RUN git config --global --add safe.directory /monai
 
-# Build MONAI from source (editable install)
-RUN BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py develop
+# Expose the ROCm devel headers (rocThrust/rocPRIM/hipCUB via _rocm_sdk_devel) to
+# the HIP compile, plus the gcc-13 include path workaround for CuPy.
+ENV CPATH="/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel/include:/usr/lib/gcc/x86_64-linux-gnu/13/include"
 
-# Temporary: Workaround for CuPy 13.5.1, rocm 7.2 issue with gcc include path
-ENV CPATH="/usr/lib/gcc/x86_64-linux-gnu/13/include"
+# Build MONAI from source (editable install). Use --no-build-isolation so the
+# build sees the base image's pre-installed ROCm torch; isolation would pull a
+# CUDA torch into the build env and fail with "CUDA_HOME not set". more-itertools
+# is a build-system requirement not shipped in the base venv.
+RUN pip install --no-cache-dir more-itertools && \
+    BUILD_MONAI=1 FORCE_CUDA=1 pip install --no-build-isolation -e .
 
 RUN python3 -c "import torch; print('Torch version:', torch.__version__)" && \
     python3 -c "import cupy; print('amd cupy version:', cupy.__version__)" && \

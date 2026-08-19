@@ -11,7 +11,7 @@
 MONAI on ROCm documentation
 *****************************
 
-The Medical Open Network for AI (MONAI) is a domain-optimized, open-source framework based on PyTorch, explicitly designed for deep learning in healthcare imaging. MONAI 1.5.2 on ROCm is a :doc:`HIP <hip:index>` port of `MONAI upstream version 1.5.2 <https://monai.readthedocs.io/en/stable/whatsnew_1_5_2.html>`_. It is API-compatible with upstream MONAI without requiring any code changes.
+The Medical Open Network for AI (MONAI) is a domain-optimized, open-source framework based on PyTorch, explicitly designed for deep learning in healthcare imaging. MONAI 1.6.0 on ROCm is a :doc:`HIP <hip:index>` port of `MONAI upstream version 1.6.0 <https://monai.readthedocs.io/en/stable/whatsnew_1_6_0.html>`_. It is API-compatible with upstream MONAI without requiring any code changes.
 
 MONAI on ROCm, a ROCm-enabled version of `MONAI <https://project-monai.github.io/>`_, is built on top of `PyTorch for AMD ROCm <https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/>`_, helping healthcare and life science innovators to leverage GPU acceleration with AMD Instinct™ GPUs for high-performance inference and training of medical AI applications.
 
@@ -29,7 +29,7 @@ The MONAI on ROCm key features include:
 
 - Multi-GPU multinode data parallelism support.
 
-The code is open and hosted at `<https://github.com/ROCm-LS/monai>`_.
+The code is open and hosted at `<https://github.com/AMD-Ecosystem/MONAI>`_.
 
 The documentation is structured as follows:
 
@@ -50,7 +50,7 @@ The documentation is structured as follows:
     * `MONAI on ROCm blog <https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html>`_
 
 To contribute to MONAI on ROCm, refer to
-`Contributing to MONAI on ROCm <https://github.com/ROCm-LS/monai/blob/main/CONTRIBUTING.md>`_.
+`Contributing to MONAI on ROCm <https://github.com/AMD-Ecosystem/MONAI/blob/main/CONTRIBUTING.md>`_.
 
 You can find licensing information on the
 :doc:`Licensing <license>` page.

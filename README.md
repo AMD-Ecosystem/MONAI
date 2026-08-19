@@ -30,12 +30,14 @@ MONAI for AMD ROCm works with Python 3.12, and depends directly on NumPy and [Py
 
 ## Installation
 
-Install [the current release](https://pypi.amd.com/rocm-7.2.0/simple/amd-monai/) using pip with the appropriate ROCm index:
+MONAI for AMD ROCm targets a ROCm 7.14 runtime (for example, the
+`rocm/pytorch:rocm7.14_ubuntu24.04_py3.12_pytorch_release_2.12.0` image, which ships
+PyTorch and Python 3.12). Install [the current release](https://pypi.amd.com/rocm-7.2.0/simple/amd-monai/)
+from the AMD PyPI index:
 
-| ROCm Version | Install Command |
-|:---:|---|
-| **7.0.2** | `pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-7.0.2/simple/` |
-| **7.2** | `pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-7.2.0/simple/` |
+```
+pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-7.2.0/simple/
+```
 
 For additional options, see the [installation guide](https://rocm.docs.amd.com/projects/monai/en/latest/install/installation.html).
 
@@ -69,6 +71,6 @@ Ask and answer questions over on [MONAI's GitHub Discussions tab](https://github
 ## Links
 
 - Website: <https://instinct.docs.amd.com/latest/life-science/MONAI.html>
-- Code: <https://github.com/ROCm-LS/MONAI>
-- Issue tracker: <https://github.com/ROCm-LS/MONAI/issues>
+- Code: <https://github.com/AMD-Ecosystem/MONAI>
+- Issue tracker: <https://github.com/AMD-Ecosystem/MONAI/issues>
 - PyPI package: <https://pypi.amd.com/simple/amd-monai/>

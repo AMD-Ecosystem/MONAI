@@ -11,7 +11,7 @@
 Supported features and limitations
 ===================================
 
-This topic discusses the supported features and limitations of MONAI 1.5.2 on ROCm as compared to the `MONAI upstream version 1.5.2 <https://github.com/Project-MONAI/MONAI/releases/tag/1.5.2>`_.
+This topic discusses the supported features and limitations of MONAI 1.6.0 on ROCm as compared to the `MONAI upstream version 1.6.0 <https://github.com/Project-MONAI/MONAI/releases/tag/1.6.0>`_.
 
 Supported features
 -------------------
@@ -69,7 +69,7 @@ For more information about the MONAI Model Zoo, see :ref:`model-zoo`.
 Limitations
 ------------
 
-- MONAI on ROCm only supports features from amd-cupy 13.5.1 and later, and hipCIM 25.10.00 and later.
+- MONAI on ROCm only supports features from amd-cupy 14.1.1 and later, and hipCIM 26.06.00 and later.
 
 - There is no support for:
 
