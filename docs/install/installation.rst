@@ -72,7 +72,7 @@ To set up the environment for MONAI on ROCm installation, follow these steps:
       rm -rf /var/lib/apt/lists/*
 
 3. Install hipCIM for accelerated digital-pathology image I/O. PyTorch is already
-   present in the container, so it is not reinstalled.
+   present in the ``rocm/pytorch`` container started in step 1, so it is not reinstalled.
 
    .. code-block:: shell
 
