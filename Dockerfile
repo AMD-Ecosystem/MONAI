@@ -59,7 +59,6 @@ ENV PYTORCH_ROCM_ARCH=${AMDGPU_TARGETS}
 # AMD PyPI index for amd-hipcim and amd-monai wheels. Torch is served from a
 # separate index (repo.amd.com/rocm/whl-multi-arch) and is already installed in
 # the base image, so this ARG only governs AMD-built Python packages.
-# Switch to rocm-10.0.0 (or later) once that index goes live.
 ARG AMD_PIP_INDEX="https://pypi.amd.com/rocm-10.0.0/simple/"
 
 # PyTorch is preinstalled in the base venv — do not install it here.

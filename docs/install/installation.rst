@@ -127,9 +127,8 @@ To build MONAI on ROCm from source, follow the steps given in this section.
 
    .. code-block:: shell
 
-      git clone git@github.com:AMD-Ecosystem/MONAI.git
+      git clone git@github.com:AMD-Ecosystem/MONAI.git monai
       cd monai
-
 2. Create and activate the development environment for building MONAI on ROCm.
 
    .. code-block:: shell
