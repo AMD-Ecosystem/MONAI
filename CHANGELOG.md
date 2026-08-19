@@ -3,6 +3,23 @@ All notable changes to MONAI are documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [1.6.0 AMD ROCm] - 2026-08-19
+
+AMD ROCm release based on upstream MONAI 1.6.0. Requires ROCm 7.14, Python 3.12, PyTorch 2.12.0+rocm7.14.0.
+
+### Added (AMD)
+* `SwinUNETR`: fused SDPA attention, channels-last memory format, and bfloat16 support for AMD MI300X inference (#1)
+* `DynUNet`: ROCm-only GEMM decomposition for decoder `ConvTranspose3d` upsamples via `use_gemm_transpose` (default `True`) and `enable_gemm_transpose()` helper (#2, #5)
+* `DiNTS`: constant-fold topology branches to eliminate `torch.compile` graph breaks (#3)
+* Dynamic `install_requires` in `setup.py` — ROCm torch and per-GPU-arch device extras resolved at wheel-build time (#101)
+
+### Changed (AMD)
+* Dockerfile: migrated to `rocm/pytorch:rocm7.14_ubuntu24.04_py3.12_pytorch_release_2.12.0` (TheRock pip-SDK base); drops amdgpu-install, adds `rocm-sdk-devel` for from-source HIP builds
+* Repository URLs retargeted from `ROCm-LS/monai` to `AMD-Ecosystem/MONAI`
+* Python minimum raised to 3.12; NVIDIA dependency pins zeroed in `amd-constraints.txt`
+* Re-enabled AMD-skipped tests: MIOpen, HPO, GMM, signal, and others now pass on ROCm (#104, #105)
+* AMD OSRB copyright headers applied across all modified source files (#106)
+
 ## [Unreleased]
 
 ## [1.6.0] - 2026-06-12

@@ -22,110 +22,77 @@ System requirements
 
 - Ubuntu version: 24.04
 
-- ROCm version:  7.2.0, 7.0.2
+- ROCm version: 7.14.0
 
 - Python version: 3.12
 
 - AMD Instinct™ GPU: MI355X, MI325X, or MI300X
 
-- `PyTorch for AMD ROCm <https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/>`_ version: 2.8.0 and later
+- `PyTorch for AMD ROCm <https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html>`_ version: 2.8.0 and later
 
 - NumPy version: No earlier than 1.24 and no later than 2.4
 
-For the complete list of dependencies, see the `requirements.txt <https://github.com/ROCm-LS/monai/blob/main/requirements.txt>`_ file.
+For the complete list of dependencies, see the `requirements.txt <https://github.com/AMD-Ecosystem/MONAI/blob/main/requirements.txt>`_ file.
 
 Setting up the environment
 ---------------------------
 
 To set up the environment for MONAI on ROCm installation, follow these steps:
 
-1. Set up the Docker image using the ROCm or Ubuntu Docker image from Docker Hub.
-
-   - For ROCm 7.2.0, run:
-
-     .. code-block:: shell
-
-      docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true   \
-      --shm-size=512GB --network=host --device=/dev/kfd        \
-      --device=/dev/dri --group-add video -it                  \
-      -v $HOME:$HOME  --name ${LOGNAME}_monai                  \
-                              rocm/dev-ubuntu-24.04:7.2-complete
-
-   - For ROCm 7.0.2, run:
-
-     .. code-block:: shell
-
-      docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true   \
-      --shm-size=512GB --network=host --device=/dev/kfd        \
-      --device=/dev/dri --group-add video -it                  \
-      -v $HOME:$HOME  --name ${LOGNAME}_monai                  \
-                            rocm/dev-ubuntu-24.04:7.0.2-complete
-
-2. Install the required system dependencies.
+1. Start the ROCm PyTorch Docker container. This image ships ROCm 7.14.0, PyTorch,
+   and Python 3.12, so PyTorch is already installed and no separate PyTorch install
+   step is required.
 
    .. code-block:: shell
 
-      apt-get update                                                        &&  \
-      apt-get install -y software-properties-common lsb-release gnupg wget  &&  \
-      apt-key adv --fetch-keys                                                  \
-                  https://apt.kitware.com/keys/kitware-archive-latest.asc &&  \
-      add-apt-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" && \
+      docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true                 \
+      --shm-size=512GB --network=host --device=/dev/kfd                            \
+      --device=/dev/dri --group-add video -it                                      \
+      -v $HOME:$HOME  --name ${LOGNAME}_monai                                       \
+      rocm/pytorch:rocm7.14_ubuntu24.04_py3.12_pytorch_release_2.12.0
+
+   To install PyTorch for AMD ROCm on a different base image or on bare metal,
+   follow the official guide at
+   `PyTorch for AMD ROCm <https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html>`_.
+   To install ROCm itself on a non-container host, see
+   `ROCm installation <https://rocm.docs.amd.com/en/latest/install/rocm.html>`_.
+
+2. Install the required system dependencies. ROCm (including ``rocjpeg``) is
+   provided by the base image's ROCm SDK, so only the imaging build libraries are
+   added here. ``build-essential`` is included because the Triton AMD backend
+   JIT-compiles HIP kernels at runtime.
+
+   .. code-block:: shell
+
       apt-get update && \
       apt-get install -y --no-install-recommends \
-         build-essential git gcc g++ cmake \
-         ninja-build yasm python3-venv \
+         build-essential git cmake ninja-build yasm \
          openssh-client \
-         libopenslide-dev libwebp-dev \
-         libzstd-dev && \
+         libopenslide-dev libwebp-dev libzstd-dev && \
       rm -rf /var/lib/apt/lists/*
 
-      ROCM_VERSION=$(cat /opt/rocm/.info/version) && \
-      UBUNTU_CODENAME=$(lsb_release -cs) && \
-      echo "Detected ROCm version: ${ROCM_VERSION}, Ubuntu codename: ${UBUNTU_CODENAME}" && \
-      MAJOR=$(echo ${ROCM_VERSION} | cut -d. -f1) && \
-      MINOR=$(echo ${ROCM_VERSION} | cut -d. -f2) && \
-      PATCH=$(echo ${ROCM_VERSION} | cut -d. -f3) && \
-      PATCH=${PATCH:-0} && \
-      VERNUM=$((MAJOR * 10000 + MINOR * 100 + PATCH)) && \
-      if [ "${PATCH}" = "0" ]; then ROCM_SHORT_VERSION="${MAJOR}.${MINOR}"; else ROCM_SHORT_VERSION="${MAJOR}.${MINOR}.${PATCH}"; fi
-
-      if ! dpkg -s amdgpu-install >/dev/null 2>&1; then \
-         rm -f /etc/apt/sources.list.d/amdgpu.list /etc/apt/sources.list.d/rocm.list && \
-         AMDGPU_URL="https://repo.radeon.com/amdgpu-install/${ROCM_SHORT_VERSION}/ubuntu/${UBUNTU_CODENAME}/amdgpu-install_${ROCM_SHORT_VERSION}.${VERNUM}-1_all.deb" && \
-         echo "Downloading: ${AMDGPU_URL}" && \
-         wget "${AMDGPU_URL}" -O amdgpu-install.deb && \
-         apt-get update && \
-         DEBIAN_FRONTEND=noninteractive apt-get install -y ./amdgpu-install.deb && \
-         rm amdgpu-install.deb; \
-      else \
-         echo "amdgpu-install already present, skipping install"; \
-      fi && \
-      apt-get update && \
-      apt-get install -y --no-install-recommends amdgpu-lib && \
-      apt-get install -y --no-install-recommends rocjpeg rocjpeg-dev && \
-      rm -rf /var/lib/apt/lists/*
-
-3. Create the Python virtual environment.
+3. Install hipCIM for accelerated digital-pathology image I/O. PyTorch is already
+   present in the ``rocm/pytorch`` container started in step 1, so it is not reinstalled.
 
    .. code-block:: shell
 
-      python3 -m venv monai_dev
-      source monai_dev/bin/activate
       pip install --upgrade pip
-      pip install torch torchvision torchaudio      \
-                  --index-url https://download.pytorch.org/whl/rocm7.1
-      pip install amd-hipcim --extra-index-url=https://pypi.amd.com/rocm-${ROCM_SHORT_VERSION}/simple/
+      pip install amd-hipcim --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple/
 
-4. Set the environment variables.
+4. Set the environment variables. ROCm ships as a pip package in this image, so
+   ``ROCM_PATH`` points at the ROCm SDK inside the virtual environment rather than
+   ``/opt/rocm``.
 
    .. code-block:: shell
 
-      export HIP_PATH=/opt/rocm
-      export PATH=$HIP_PATH/bin:$PATH
-      export ROCM_PATH=/opt/rocm
-      export LD_LIBRARY_PATH=$HIP_PATH/lib:$LD_LIBRARY_PATH
-      export ROCM_HOME=/opt/rocm
-      export AMDGPU_TARGETS=gfx942
+      export ROCM_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_core
+      export ROCM_HOME=$ROCM_PATH
+      export ROCM_LIBRARIES_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_libraries
+      export PATH=$ROCM_PATH/bin:$PATH
+      # TheRock splits runtime libraries across the core and libraries trees (plus
+      # nested subdirs); the math libraries that CuPy loads live in the latter.
+      export LD_LIBRARY_PATH=$ROCM_PATH/lib:$ROCM_PATH/lib/rocm_sysdeps/lib:$ROCM_PATH/lib/llvm/lib:$ROCM_LIBRARIES_PATH/lib:$LD_LIBRARY_PATH
+      export AMDGPU_TARGETS="gfx942;gfx950"
       export HIP_VISIBLE_DEVICES=0
 
 .. _package-install:
@@ -147,7 +114,7 @@ For MONAI on ROCm installation using a package manager, follow the steps given i
 
    .. code-block:: shell
 
-      pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-${ROCM_SHORT_VERSION}/simple
+      pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple/
 
 .. _source-install:
 
@@ -160,30 +127,41 @@ To build MONAI on ROCm from source, follow the steps given in this section.
 
    .. code-block:: shell
 
-      git clone git@github.com:ROCm-LS/monai.git
+      git clone git@github.com:AMD-Ecosystem/MONAI.git monai
       cd monai
-
 2. Create and activate the development environment for building MONAI on ROCm.
 
    .. code-block:: shell
 
+      pip install more-itertools
       pip install -r requirements-dev.txt -c amd-constraints.txt --build-constraint amd-constraints.txt
 
-3. Build and install MONAI on ROCm on a ROCm-based AMD system using the development environment.
+3. Install the ROCm devel SDK. The ROCm PyTorch runtime image ships only the ROCm
+   runtime; the from-source HIP compile additionally needs the devel headers
+   (rocThrust, rocPRIM, hipCUB) and the unversioned ``lib*.so`` link symlinks.
 
-   - To build and install the development version of MONAI on ROCm, use:
+   .. code-block:: shell
 
-     .. code-block:: shell
+      pip install "rocm-sdk-devel==7.14.0" --extra-index-url=https://repo.amd.com/rocm/whl-multi-arch/
+      rocm-sdk init
+      export ROCM_DEVEL_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel
+      export PYTORCH_ROCM_ARCH=$AMDGPU_TARGETS
+      export CPATH=$ROCM_DEVEL_PATH/include:/usr/lib/gcc/x86_64-linux-gnu/13/include:$CPATH
+      export LIBRARY_PATH=$ROCM_DEVEL_PATH/lib:$ROCM_PATH/lib
+      # clang expects device bitcode under $ROCM_PATH/amdgcn/bitcode
+      mkdir -p $ROCM_PATH/amdgcn
+      ln -sf $ROCM_PATH/lib/llvm/amdgcn/bitcode $ROCM_PATH/amdgcn/bitcode
 
-      BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py develop
+4. Build and install MONAI on ROCm. Use ``--no-build-isolation`` so the build
+   reuses the pre-installed ROCm PyTorch; build isolation would pull a CUDA build
+   of PyTorch and fail.
 
-   - To build and package an optimized wheel for installation, use:
+   .. code-block:: shell
 
-     .. code-block:: shell
+      BUILD_MONAI=1 FORCE_CUDA=1 pip install --no-build-isolation -e .
 
-      BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py develop -O1 bdist_wheel
-
-     The preceding command builds the package in non-debug mode and the wheel file is generated under the ``dist`` directory.
+   The repository ``Dockerfile`` performs this same sequence end to end and is the
+   reference for a reproducible from-source build.
 
 Verify installation
 --------------------
@@ -196,7 +174,7 @@ Use these commands to verify the MONAI on ROCm installation:
 
    $ python -c "import monai; print(monai.__version__)"
 
-   1.5.2
+   1.6.0
 
 - Print the MONAI on ROCm package info.
 
@@ -205,7 +183,7 @@ Use these commands to verify the MONAI on ROCm installation:
    $ pip show -v amd-monai
 
    Name: amd-monai
-   Version: 1.5.2
+   Version: 1.6.0
    Summary: AI Toolkit for Healthcare Imaging
    Home-page: https://rocm.docs.amd.com/projects/monai/en/latest/
    Author: AMD Corporation
@@ -235,5 +213,5 @@ Use these commands to verify the MONAI on ROCm installation:
    Entry-points:
    Project-URLs:
       Documentation, https://rocm.docs.amd.com/projects/monai/en/latest/
-      Bug Tracker, https://github.com/ROCm-LS/monai/issues
-      Source Code, https://github.com/ROCm-LS/monai/
+      Bug Tracker, https://github.com/AMD-Ecosystem/MONAI/issues
+      Source Code, https://github.com/AMD-Ecosystem/MONAI/
