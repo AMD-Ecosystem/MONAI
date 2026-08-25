@@ -619,5 +619,47 @@ class TestDataAnalyzer(unittest.TestCase):
         self.test_dir.cleanup()
 
 
+class TestEffectiveGpuCount(unittest.TestCase):
+    """Unit tests for _effective_gpu_count() — no GPU hardware required."""
+
+    def _call(self, env: dict, device_count: int = 2) -> int:
+        from unittest.mock import patch
+        from monai.apps.auto3dseg.data_analyzer import _effective_gpu_count
+
+        with patch("monai.apps.auto3dseg.data_analyzer.torch") as mock_torch:
+            mock_torch.cuda.device_count.return_value = device_count
+            with patch.dict("os.environ", env, clear=False):
+                # Remove vars not in env so tests are isolated
+                for var in ("HIP_VISIBLE_DEVICES", "CUDA_VISIBLE_DEVICES", "ROCR_VISIBLE_DEVICES"):
+                    if var not in env:
+                        os.environ.pop(var, None)
+                return _effective_gpu_count()
+
+    def test_no_vars_returns_device_count(self):
+        env = {k: "" for k in ("HIP_VISIBLE_DEVICES", "CUDA_VISIBLE_DEVICES", "ROCR_VISIBLE_DEVICES")}
+        self.assertEqual(self._call(env, device_count=2), 2)
+
+    def test_hip_restricts(self):
+        self.assertEqual(self._call({"HIP_VISIBLE_DEVICES": "0", "CUDA_VISIBLE_DEVICES": ""}, device_count=2), 1)
+
+    def test_cuda_restricts(self):
+        self.assertEqual(self._call({"CUDA_VISIBLE_DEVICES": "0", "HIP_VISIBLE_DEVICES": ""}, device_count=2), 1)
+
+    def test_conflict_hip_wins_via_min(self):
+        # HIP=0,1 CUDA=0 — the conflict case; effective count is 1
+        self.assertEqual(self._call({"HIP_VISIBLE_DEVICES": "0,1", "CUDA_VISIBLE_DEVICES": "0"}, device_count=2), 1)
+
+    def test_sentinel_minus_one_returns_zero(self):
+        self.assertEqual(self._call({"CUDA_VISIBLE_DEVICES": "-1", "HIP_VISIBLE_DEVICES": ""}, device_count=2), 0)
+
+    def test_sentinel_nodevfiles_returns_zero(self):
+        self.assertEqual(self._call({"HIP_VISIBLE_DEVICES": "NoDevFiles", "CUDA_VISIBLE_DEVICES": ""}, device_count=2), 0)
+
+    def test_rocr_restricts(self):
+        self.assertEqual(
+            self._call({"ROCR_VISIBLE_DEVICES": "0", "HIP_VISIBLE_DEVICES": "", "CUDA_VISIBLE_DEVICES": ""}, device_count=4), 1
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

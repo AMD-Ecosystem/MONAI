@@ -73,27 +73,6 @@ Supported features
     - Computational pathology foundation model validated on AMD hardware. ViT-based WSI patch inference through Hugging Face.
 
 Limitations
-===========
-
-.. list-table::
-  :header-rows: 1
-  :widths: 32 68
-
-  * - Limitation
-    - Details
-  * - GPU direct storage through KvikIO or cuFile
-    - Not supported on ROCm. Standard CPU-mediated I/O is used instead.
-  * - rocTX and NVTX profiling markers
-    - MONAI NVTX-based profiling annotations are not functional on ROCm. Use ``rocprof`` or Omniperf directly.
-  * - CuPy version
-    - Requires ``amd-cupy`` 14.1.1 or later. Standard NVIDIA CuPy packages are not compatible on ROCm.
-  * - hipCIM version
-    - WSI support requires ``amd-hipcim`` 26.06.00 or later.
-  * - ``torch.compile`` first-call latency
-    - Expect 30 to 120 seconds of compilation on the first call when ``torch.compile`` is enabled. Subsequent calls use the cached graph.
-
-Network architecture support matrix
-===================================
 
 .. list-table::
   :header-rows: 1
