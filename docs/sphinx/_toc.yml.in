@@ -15,8 +15,9 @@ subtrees:
 
 - caption: Reference
   entries:
+  - file: reference/overview
   - file: reference/support-limitations
-  - file: reference/model-zoo
+  - file: reference/release-notes
 
 - caption: Related content
   entries:

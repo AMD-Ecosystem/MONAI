@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
 
+# Anywhere amd-integration is used, the branch name will be substituted.
+# These comments will also be removed.
 
 defaults:
   numbered: False
@@ -10,11 +10,17 @@ subtrees:
 - caption: Install
   entries:
   - file: install/installation
-    title: Installation
 
 - caption: Reference
   entries:
+  - file: reference/overview
   - file: reference/support-limitations
+  - file: reference/release-notes
+
+- caption: Related content
+  entries:
+  - url: https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html
+    title: MONAI on ROCm blog
 
 - caption: About
   entries:

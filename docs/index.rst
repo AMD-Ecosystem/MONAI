@@ -2,8 +2,8 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 .. meta::
-  :description: MONAI is a domain-optimized, open-source framework based on PyTorch, designed specifically for deep learning in healthcare imaging.
-  :keywords: ROCm-LS, life sciences, MONAI for AMD ROCm documentation, MONAI on ROCm document, AMD MONAI, ROCm MONAI
+   :description: MONAI is a domain-optimized, open-source framework based on PyTorch, designed specifically for deep learning in healthcare imaging.
+   :keywords: ROCm-LS, life sciences, MONAI for AMD ROCm documentation, MONAI on ROCm document, AMD MONAI, ROCm MONAI
 
 .. _index:
 
@@ -11,27 +11,9 @@
 MONAI on ROCm documentation
 *****************************
 
-The Medical Open Network for AI (MONAI) is a domain-optimized, open-source framework based on PyTorch, explicitly designed for deep learning in healthcare imaging. MONAI 1.5.2 on ROCm is a :doc:`HIP <hip:index>` port of `MONAI upstream version 1.5.2 <https://monai.readthedocs.io/en/stable/whatsnew_1_5_2.html>`_. It is API-compatible with upstream MONAI without requiring any code changes.
+`The Medical Open Network for AI (MONAI) <https://monai.io/>`_ is a domain-optimized, open-source framework based on PyTorch, explicitly designed for deep learning in healthcare imaging. ``amd-monai`` is AMD's ROCm-enabled port of upstream MONAI, targeting AMD Instinct™ GPUs for inference on ROCm. It is an API-compatible :doc:`HIP <hip:index>` port for use with AMD GPUs. For more information, see :ref:`What is Monai? <what-is-monai>`.
 
-MONAI on ROCm, a ROCm-enabled version of `MONAI <https://project-monai.github.io/>`_, is built on top of `PyTorch for AMD ROCm <https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/>`_, helping healthcare and life science innovators to leverage GPU acceleration with AMD Instinct™ GPUs for high-performance inference and training of medical AI applications.
-
-MONAI on ROCm offers open, scalable, and high-performance solutions for life science and healthcare workloads.
-
-The MONAI on ROCm key features include:
-
-- Flexible preprocessing for multidimensional medical imaging data.
-
-- Compositional and portable APIs for smooth integration into existing workflows.
-
-- Domain-specific implementations for networks, losses, evaluation metrics, and more.
-
-- Customizable design according to user expertise.
-
-- Multi-GPU multinode data parallelism support.
-
-The code is open and hosted at `<https://github.com/ROCm-LS/monai>`_.
-
-The documentation is structured as follows:
+The MONAI on ROCm project is located in `ROCm-LS/monai <https://github.com/ROCm-LS/monai>`_.
 
 .. grid:: 2
   :gutter: 3
@@ -40,10 +22,14 @@ The documentation is structured as follows:
 
     * :ref:`installing-monai`
 
+.. grid:: 2
+  :gutter: 3
+
   .. grid-item-card:: Reference
 
+    * :ref:`monai-overview`
     * :ref:`monai-features`
-    * :ref:`model-zoo`
+    * :ref:`monai-whats-new`
 
   .. grid-item-card:: Related content
 
@@ -54,3 +40,8 @@ To contribute to MONAI on ROCm, refer to
 
 You can find licensing information on the
 :doc:`Licensing <license>` page.
+
+.. toctree::
+   :hidden:
+
+   what-is-monai

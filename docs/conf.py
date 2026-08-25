@@ -31,7 +31,12 @@ flavor defines the site header display, select the flavor for the corresponding 
 flavor options: rocm, rocm-docs-home, rocm-blogs, rocm-ds, instinct, ai-developer-hub, local, generic
 '''
 html_theme = "rocm_docs_theme"
-html_theme_options = {"flavor": "rocm-ls"}
+# repository_url is set explicitly because the theme can only derive it from an
+# https or git@host:org/repo remote, which SSH host aliases don't match.
+html_theme_options = {
+    "flavor": "rocm-ls",
+    "repository_url": "https://github.com/ROCm-LS/monai",
+}
 
 '''
 docs_header_version is used to manually configure the version in the header. If
@@ -39,7 +44,7 @@ there exists a non-null value mapped to docs_header_version, then the header in
 the documentation page will contain the given version string.
 '''
 html_context = {
-    "docs_header_version": "26.03"
+    "docs_header_version": "1.6.0"
 }
 
 
@@ -49,10 +54,10 @@ all_article_info_os = ["linux"]
 all_article_info_author = ""
 
 # Dynamically extract component version
-version_number = "1.5.2"
+version_number = "1.6.0"
 
 # for PDF output on Read the Docs
-project = "MONAI 1.5.2 on ROCm"
+project = "MONAI 1.6.0 on ROCm"
 author = "Advanced Micro Devices, Inc."
 copyright = "Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved."
 version = version_number

@@ -7,61 +7,46 @@
 
 .. _installing-monai:
 
-===========================
+********************************
 MONAI on ROCm installation
-===========================
+********************************
 
-To install MONAI on ROCm, you have the following options:
+MONAI on ROCm can be installed using the package manager or from source. Package manager installation is recommended for users who don't intend to contribute to the project.
 
-- :ref:`Use package manager <package-install>` (recommended)
+- :ref:`Use package manager <package-install>`
 
 - :ref:`Build from source <source-install>`
 
 System requirements
---------------------
+===================
 
-- Ubuntu version: 24.04
++--------------+----------------+----------------+------------------------------------------+
+| ROCm version | Ubuntu version | Python version | AMD Instinct™ GPU (tested)               |
++==============+================+================+==========================================+
+| 10.0.0       | 24.04          | 3.12           | MI300X, MI325X, MI350X, MI355X           |
++--------------+----------------+----------------+------------------------------------------+
 
-- ROCm version:  7.2.0, 7.0.2
-
-- Python version: 3.12
-
-- AMD Instinct™ GPU: MI355X, MI325X, or MI300X
-
-- `PyTorch for AMD ROCm <https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/>`_ version: 2.8.0 and later
-
-- NumPy version: No earlier than 1.24 and no later than 2.4
-
-For the complete list of dependencies, see the `requirements.txt <https://github.com/ROCm-LS/monai/blob/main/requirements.txt>`_ file.
+MONAI on ROCm requires `PyTorch for AMD ROCm <https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html>`_, which ships with ROCm. NumPy 1.24 or later is required.
 
 Setting up the environment
----------------------------
+==========================
 
-To set up the environment for MONAI on ROCm installation, follow these steps:
+Set up the environment before installing MONAI on ROCm.
 
-1. Set up the Docker image using the ROCm or Ubuntu Docker image from Docker Hub.
+1. Optionally launch a Docker container.
 
-   - For ROCm 7.2.0, run:
+   Use the ROCm Ubuntu Docker image from Docker Hub:
 
-     .. code-block:: shell
-
-      docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true   \
-      --shm-size=512GB --network=host --device=/dev/kfd        \
-      --device=/dev/dri --group-add video -it                  \
-      -v $HOME:$HOME  --name ${LOGNAME}_monai                  \
-                              rocm/dev-ubuntu-24.04:7.2-complete
-
-   - For ROCm 7.0.2, run:
-
-     .. code-block:: shell
+   .. code-block:: shell
 
       docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true   \
       --shm-size=512GB --network=host --device=/dev/kfd        \
       --device=/dev/dri --group-add video -it                  \
       -v $HOME:$HOME  --name ${LOGNAME}_monai                  \
-                            rocm/dev-ubuntu-24.04:7.0.2-complete
+                              rocm/dev-ubuntu-24.04:10.0.0-complete
 
-2. Install the required system dependencies.
+
+2. Install required system dependencies.
 
    .. code-block:: shell
 
@@ -77,8 +62,7 @@ To set up the environment for MONAI on ROCm installation, follow these steps:
          openssh-client \
          libopenslide-dev libwebp-dev \
          libzstd-dev && \
-      rm -rf /var/lib/apt/lists/*
-
+      rm -rf /var/lib/apt/lists/* && \
       ROCM_VERSION=$(cat /opt/rocm/.info/version) && \
       UBUNTU_CODENAME=$(lsb_release -cs) && \
       echo "Detected ROCm version: ${ROCM_VERSION}, Ubuntu codename: ${UBUNTU_CODENAME}" && \
@@ -87,8 +71,7 @@ To set up the environment for MONAI on ROCm installation, follow these steps:
       PATCH=$(echo ${ROCM_VERSION} | cut -d. -f3) && \
       PATCH=${PATCH:-0} && \
       VERNUM=$((MAJOR * 10000 + MINOR * 100 + PATCH)) && \
-      if [ "${PATCH}" = "0" ]; then ROCM_SHORT_VERSION="${MAJOR}.${MINOR}"; else ROCM_SHORT_VERSION="${MAJOR}.${MINOR}.${PATCH}"; fi
-
+      if [ "${PATCH}" = "0" ]; then ROCM_SHORT_VERSION="${MAJOR}.${MINOR}"; else ROCM_SHORT_VERSION="${MAJOR}.${MINOR}.${PATCH}"; fi && \
       if ! dpkg -s amdgpu-install >/dev/null 2>&1; then \
          rm -f /etc/apt/sources.list.d/amdgpu.list /etc/apt/sources.list.d/rocm.list && \
          AMDGPU_URL="https://repo.radeon.com/amdgpu-install/${ROCM_SHORT_VERSION}/ubuntu/${UBUNTU_CODENAME}/amdgpu-install_${ROCM_SHORT_VERSION}.${VERNUM}-1_all.deb" && \
@@ -96,7 +79,7 @@ To set up the environment for MONAI on ROCm installation, follow these steps:
          wget "${AMDGPU_URL}" -O amdgpu-install.deb && \
          apt-get update && \
          DEBIAN_FRONTEND=noninteractive apt-get install -y ./amdgpu-install.deb && \
-         rm amdgpu-install.deb; \
+         rm -f amdgpu-install.deb; \
       else \
          echo "amdgpu-install already present, skipping install"; \
       fi && \
@@ -105,18 +88,24 @@ To set up the environment for MONAI on ROCm installation, follow these steps:
       apt-get install -y --no-install-recommends rocjpeg rocjpeg-dev && \
       rm -rf /var/lib/apt/lists/*
 
-3. Create the Python virtual environment.
+3. Create and activate the development environment.
 
    .. code-block:: shell
 
       python3 -m venv monai_dev
       source monai_dev/bin/activate
       pip install --upgrade pip
-      pip install torch torchvision torchaudio      \
-                  --index-url https://download.pytorch.org/whl/rocm7.1
+
+4. Install PyTorch and amd-hipcim for ROCm.
+
+   Install ``torch``, ``torchvision``, and ``torchaudio`` from the `PyTorch for AMD ROCm installation guide <https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html>`_.
+   Then install ``amd-hipcim``:
+
+   .. code-block:: shell
+
       pip install amd-hipcim --extra-index-url=https://pypi.amd.com/rocm-${ROCM_SHORT_VERSION}/simple/
 
-4. Set the environment variables.
+5. Set environment variables.
 
    .. code-block:: shell
 
@@ -128,14 +117,19 @@ To set up the environment for MONAI on ROCm installation, follow these steps:
       export AMDGPU_TARGETS=gfx942
       export HIP_VISIBLE_DEVICES=0
 
+   .. note::
+
+      For MI300X and MI325X, set ``AMDGPU_TARGETS=gfx942``.
+      For MI350X and MI355X, set ``AMDGPU_TARGETS=gfx950``.
+
 .. _package-install:
 
-Installing using package manager
-----------------------------------
+Install MONAI on ROCm from AMD PyPI
+===================================
 
-For MONAI on ROCm installation using a package manager, follow the steps given in this section.
+Use these steps to install MONAI on ROCm from AMD PyPI.
 
-1. Install the optional system dependencies depending on the workload.
+1. Install optional dependencies depending on the workload:
 
    .. code-block:: shell
 
@@ -147,93 +141,70 @@ For MONAI on ROCm installation using a package manager, follow the steps given i
 
    .. code-block:: shell
 
-      pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-${ROCM_SHORT_VERSION}/simple
+      pip install amd-monai --extra-index-url=https://pypi.amd.com/rocm-${ROCM_SHORT_VERSION}/simple/
+
+   .. note::
+
+      ``amd-monai`` can pull in a CUDA build of PyTorch as a transitive dependency, replacing the ROCm build.
+      If that happens, reinstall ``torch``, ``torchvision``, and ``torchaudio`` from the `PyTorch for AMD ROCm installation guide <https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html>`_.
 
 .. _source-install:
 
-Building from source
----------------------
+Build MONAI on ROCm from source
+===============================
 
-To build MONAI on ROCm from source, follow the steps given in this section.
+MONAI on ROCm can also be built from source if you intend to contribute to the project.
 
-1. Download the latest version of MONAI on ROCm from the GitHub repository.
+1. Clone the MONAI on ROCm repository.
 
    .. code-block:: shell
 
       git clone git@github.com:ROCm-LS/monai.git
       cd monai
 
-2. Create and activate the development environment for building MONAI on ROCm.
+2. Install the development environment.
 
    .. code-block:: shell
 
       pip install -r requirements-dev.txt -c amd-constraints.txt --build-constraint amd-constraints.txt
 
-3. Build and install MONAI on ROCm on a ROCm-based AMD system using the development environment.
+3. Build and install with C++ extensions.
 
-   - To build and install the development version of MONAI on ROCm, use:
-
-     .. code-block:: shell
+   .. code-block:: shell
 
       BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py develop
 
-   - To build and package an optimized wheel for installation, use:
+   To build and package an optimized wheel:
 
-     .. code-block:: shell
+   .. code-block:: shell
 
       BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py develop -O1 bdist_wheel
 
-     The preceding command builds the package in non-debug mode and the wheel file is generated under the ``dist`` directory.
+   The wheel file is generated under the ``dist`` directory.
 
 Verify installation
---------------------
+===================
 
-Use these commands to verify the MONAI on ROCm installation:
+Verify the MONAI on ROCm installation.
 
-- Print the MONAI on ROCm version.
+.. code-block:: shell
 
-  .. code-block:: shell
+   python3 -c "import monai; print(monai.__version__)"
 
-   $ python -c "import monai; print(monai.__version__)"
+.. code-block:: python
 
-   1.5.2
+   import torch
+   import monai
 
-- Print the MONAI on ROCm package info.
+   print(f"MONAI version: {monai.__version__}")
+   print(f"PyTorch version: {torch.__version__}")
+   print(f"ROCm available: {torch.version.hip is not None}")
+   print(f"GPU available: {torch.cuda.is_available()}")
+   if torch.cuda.is_available():
+      print(f"GPU: {torch.cuda.get_device_name(0)}")
 
-  .. code-block:: shell
+.. code-block:: shell
 
-   $ pip show -v amd-monai
+   pip show -v amd-monai
 
-   Name: amd-monai
-   Version: 1.5.2
-   Summary: AI Toolkit for Healthcare Imaging
-   Home-page: https://rocm.docs.amd.com/projects/monai/en/latest/
-   Author: AMD Corporation
-   Author-email:
-   License: Apache License 2.0
-   Location: /scratch/users/souchatt/docker/souchatt_monai/monai
-   Editable project location: /scratch/users/souchatt/docker/souchatt_monai/monai
-   Requires: numpy, torch
-   Required-by:
-   Metadata-Version: 2.1
-   Installer:
-   Classifiers:
-      Intended Audience :: Developers
-      Intended Audience :: Education
-      Intended Audience :: Science/Research
-      Intended Audience :: Healthcare Industry
-      Programming Language :: C++
-      Programming Language :: Python :: 3
-      Programming Language :: Python :: 3.12
-      Topic :: Scientific/Engineering
-      Topic :: Scientific/Engineering :: Artificial Intelligence
-      Topic :: Scientific/Engineering :: Medical Science Apps.
-      Topic :: Scientific/Engineering :: Information Analysis
-      Topic :: Software Development
-      Topic :: Software Development :: Libraries
-      Typing :: Typed
-   Entry-points:
-   Project-URLs:
-      Documentation, https://rocm.docs.amd.com/projects/monai/en/latest/
-      Bug Tracker, https://github.com/ROCm-LS/monai/issues
-      Source Code, https://github.com/ROCm-LS/monai/
+The output lists ``Name: amd-monai``, ``Version: 1.6.0``, and the documentation URL ``https://rocm.docs.amd.com/projects/monai/en/latest/``.
