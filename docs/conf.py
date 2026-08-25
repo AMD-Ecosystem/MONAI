@@ -44,7 +44,7 @@ there exists a non-null value mapped to docs_header_version, then the header in
 the documentation page will contain the given version string.
 '''
 html_context = {
-    "docs_header_version": "1.6.0"
+    "docs_header_version": "26.08"
 }
 
 
