@@ -7,9 +7,9 @@
 
 .. _monai-overview:
 
-****************
-MONAI on ROCm
-****************
+********************************
+MONAI on ROCm overview package
+********************************
 
 MONAI on ROCm is the ROCm-enabled release of `MONAI <https://monai.io>`_, a PyTorch-based framework for medical imaging tasks. The ``amd-monai`` package is API-compatible with ``monai`` and adds AMD-specific optimizations targeting inference performance on AMD Instinct™ GPUs under ROCm.
 
