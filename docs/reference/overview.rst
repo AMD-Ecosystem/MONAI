@@ -66,6 +66,6 @@ Package information
   * - PyPI index
     - ``https://pypi.amd.com/rocm-10.0.0/simple/``
   * - Source repository
-    - `ROCm-LS/monai <https://github.com/ROCm-LS/monai>`_
+    - `AMD-Ecosystem/MONAI <https://github.com/AMD-Ecosystem/MONAI>`_
   * - Documentation
     - `https://rocm.docs.amd.com/projects/monai/en/latest/ <https://rocm.docs.amd.com/projects/monai/en/latest/>`_

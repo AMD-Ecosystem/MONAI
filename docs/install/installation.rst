@@ -11,22 +11,15 @@
 MONAI on ROCm installation
 ********************************
 
-MONAI on ROCm can be installed using the package manager or from source. Package manager installation is recommended for users who don't intend to contribute to the project.
+MONAI on ROCm can be installed using :ref:`the package manager <package-install>` or by :ref:`building from source <source-install>`. Package manager installation is recommended for users who don't intend to contribute to the project.
 
-- :ref:`Use package manager <package-install>`
-
-- :ref:`Build from source <source-install>`
-
-System requirements
-===================
+System requirements:
 
 +--------------+----------------+----------------+------------------------------------------+
 | ROCm version | Ubuntu version | Python version | AMD Instinct™ GPU (tested)               |
 +==============+================+================+==========================================+
 | 10.0.0       | 24.04          | 3.12           | MI300X, MI325X, MI350X, MI355X           |
 +--------------+----------------+----------------+------------------------------------------+
-
-MONAI on ROCm requires `PyTorch for AMD ROCm <https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html>`_, which ships with ROCm. NumPy 1.24 or later is required.
 
 Setting up the environment
 ==========================
@@ -50,9 +43,15 @@ Set up the environment before installing MONAI on ROCm.
 
    .. code-block:: shell
 
+      apt-get update                                                        &&  \
+      apt-get install -y software-properties-common lsb-release gnupg wget  &&  \
+      apt-key adv --fetch-keys                                                  \
+                  https://apt.kitware.com/keys/kitware-archive-latest.asc &&  \
+      add-apt-repository -y "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main" && \
       apt-get update && \
       apt-get install -y --no-install-recommends \
-         build-essential git cmake ninja-build yasm \
+         build-essential git gcc g++ cmake \
+         ninja-build yasm python3-venv \
          openssh-client \
          libopenslide-dev libwebp-dev \
          libzstd-dev && \
@@ -86,6 +85,8 @@ Set up the environment before installing MONAI on ROCm.
 
    .. code-block:: shell
 
+      python3 -m venv monai_dev
+      source monai_dev/bin/activate
       pip install --upgrade pip
 
 4. Install PyTorch and amd-hipcim for ROCm.
@@ -101,14 +102,12 @@ Set up the environment before installing MONAI on ROCm.
 
    .. code-block:: shell
 
-      export ROCM_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_core
-      export ROCM_HOME=$ROCM_PATH
-      export ROCM_LIBRARIES_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_libraries
-      export PATH=$ROCM_PATH/bin:$PATH
-      # TheRock splits runtime libraries across the core and libraries trees (plus
-      # nested subdirs); the math libraries that CuPy loads live in the latter.
-      export LD_LIBRARY_PATH=$ROCM_PATH/lib:$ROCM_PATH/lib/rocm_sysdeps/lib:$ROCM_PATH/lib/llvm/lib:$ROCM_LIBRARIES_PATH/lib:$LD_LIBRARY_PATH
-      export AMDGPU_TARGETS="gfx942;gfx950"
+      export HIP_PATH=/opt/rocm
+      export PATH=$HIP_PATH/bin:$PATH
+      export ROCM_PATH=/opt/rocm
+      export LD_LIBRARY_PATH=$HIP_PATH/lib:$LD_LIBRARY_PATH
+      export ROCM_HOME=/opt/rocm
+      export AMDGPU_TARGETS=gfx942
       export HIP_VISIBLE_DEVICES=0
 
    .. note::
@@ -153,36 +152,52 @@ MONAI on ROCm can also be built from source if you intend to contribute to the p
 
    .. code-block:: shell
 
-      git clone git@github.com:AMD-Ecosystem/MONAI.git monai
+      git clone git@github.com:AMD-Ecosystem/MONAI.git
       cd monai
 
 2. Install the development environment.
 
    .. code-block:: shell
 
-      pip install more-itertools
       pip install -r requirements-dev.txt -c amd-constraints.txt --build-constraint amd-constraints.txt
 
 3. Build and install with C++ extensions.
 
    .. code-block:: shell
 
-      pip install "rocm-sdk-devel==7.14.0" --extra-index-url=https://repo.amd.com/rocm/whl-multi-arch/
-      rocm-sdk init
-      export ROCM_DEVEL_PATH=/opt/venv/lib/python3.12/site-packages/_rocm_sdk_devel
-      export PYTORCH_ROCM_ARCH=$AMDGPU_TARGETS
-      export CPATH=$ROCM_DEVEL_PATH/include:/usr/lib/gcc/x86_64-linux-gnu/13/include:$CPATH
-      export LIBRARY_PATH=$ROCM_DEVEL_PATH/lib:$ROCM_PATH/lib
-      # clang expects device bitcode under $ROCM_PATH/amdgcn/bitcode
-      mkdir -p $ROCM_PATH/amdgcn
-      ln -sf $ROCM_PATH/lib/llvm/amdgcn/bitcode $ROCM_PATH/amdgcn/bitcode
+      BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py develop
 
    To build and package an optimized wheel:
 
    .. code-block:: shell
 
-      BUILD_MONAI=1 FORCE_CUDA=1 pip install --no-build-isolation -e .
+      BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py develop -O1 bdist_wheel
 
    The wheel file is generated under the ``dist`` directory.
 
 Verify installation
+===================
+
+Verify the MONAI on ROCm installation.
+
+.. code-block:: shell
+
+   python3 -c "import monai; print(monai.__version__)"
+
+.. code-block:: python
+
+   import torch
+   import monai
+
+   print(f"MONAI version: {monai.__version__}")
+   print(f"PyTorch version: {torch.__version__}")
+   print(f"ROCm available: {torch.version.hip is not None}")
+   print(f"GPU available: {torch.cuda.is_available()}")
+   if torch.cuda.is_available():
+      print(f"GPU: {torch.cuda.get_device_name(0)}")
+
+.. code-block:: shell
+
+   pip show -v amd-monai
+
+The output lists ``Name: amd-monai``, ``Version: 1.6.0``, and the documentation URL ``https://rocm.docs.amd.com/projects/monai/en/latest/``.
