@@ -19,11 +19,6 @@ subtrees:
   - file: reference/support-limitations
   - file: reference/release-notes
 
-- caption: Related content
-  entries:
-  - url: https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html
-    title: MONAI on ROCm blog
-
 - caption: About
   entries:
   - file: license
