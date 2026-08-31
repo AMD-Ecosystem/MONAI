@@ -52,13 +52,16 @@ all_article_info_author = ""
 version_number = "1.6.0"
 
 # for PDF output on Read the Docs
-project = "MONAI 1.6.0 on ROCm"
+project = "MONAI on ROCm"
 author = "Advanced Micro Devices, Inc."
 copyright = "Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved."
 version = version_number
 release = version_number
 
-external_toc_path = "./sphinx/_toc.yml" # Defines Table of Content structure definition path
+external_toc_path = "./sphinx/_toc.yml"
+
+# Use bundled projects.yaml for local builds; skip GitHub fetch for intersphinx mappings.
+external_projects_current_project = "monai"
 
 extensions = [
     "rocm_docs",
@@ -80,6 +83,6 @@ autodoc_default_options = {
     "member-order": "bysource",  # bysource: seems unfortunately not to work for Cython modules
 }
 
-html_title = f"{project} documentation"
+html_title = f"{project} {version_number}"
 
-external_projects_current_project = "MONAI on ROCm"
+
