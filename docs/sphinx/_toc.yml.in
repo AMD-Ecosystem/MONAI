@@ -17,7 +17,6 @@ subtrees:
   entries:
   - file: reference/release-notes
     title: Release notes
-  - file: reference/overview
   - file: reference/support-limitations
 
 - caption: About

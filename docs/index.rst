@@ -25,7 +25,6 @@ The MONAI on ROCm project is located in `AMD-Ecosystem/MONAI <https://github.com
   .. grid-item-card:: Reference
 
     * :ref:`Release notes <monai-whats-new>`
-    * :ref:`monai-overview`
     * :ref:`monai-features`
 
 To contribute to MONAI on ROCm, refer to
