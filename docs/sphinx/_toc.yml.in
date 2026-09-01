@@ -15,9 +15,10 @@ subtrees:
 
 - caption: Reference
   entries:
+  - file: reference/release-notes
+    title: Release notes
   - file: reference/overview
   - file: reference/support-limitations
-  - file: reference/release-notes
 
 - caption: About
   entries:

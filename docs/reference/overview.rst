@@ -7,11 +7,11 @@
 
 .. _monai-overview:
 
-********************************
-MONAI on ROCm overview package
-********************************
+**********************
+MONAI on ROCm overview  
+**********************
 
-MONAI on ROCm is the ROCm-enabled release of `MONAI <https://monai.io>`_, a PyTorch-based framework for medical imaging tasks. The ``amd-monai`` package is API-compatible with ``monai`` and adds AMD-specific optimizations targeting inference performance on AMD Instinct™ GPUs under ROCm.
+MONAI on ROCm is AMD's ROCm port of `MONAI 1.6.0 <https://monai.io>`_, a PyTorch-based framework for medical imaging tasks. The ``amd-monai`` package is API-compatible with ``monai`` and adds inference optimizations for AMD Instinct™ MI300X, MI325X, and MI355X GPUs.
 
 AMD ROCm port
 =============
@@ -30,7 +30,7 @@ AMD-specific optimizations
     - Description
   * - Fused Scaled Dot-Product Attention
     - ``SwinUNETR.WindowAttention``
-    - Automatically enabled on ROCm through ``torch.nn.functional.scaled_dot_product_attention`` when HIP is detected. Replaces the default multi-head attention path with a fused kernel, reducing memory use and improving throughput on MI300-class hardware.
+    - Automatically enabled on ROCm through ``torch.nn.functional.scaled_dot_product_attention`` when HIP is detected. It replaces the default multi-head attention path with a fused kernel.
   * - Dynamic graph stabilization
     - ``SlidingWindowInferer``
     - Calls ``torch._dynamo.maybe_mark_dynamic(win_data, 0)`` on ROCm so the sliding-window batch dimension is treated as dynamic by ``torch.compile``. This prevents repeated graph recompilation across windows of differing batch sizes.
@@ -42,9 +42,8 @@ AMD-specific optimizations
     - ``amd-constraints.txt`` pins all ``nvidia-cu*`` packages to version 0, which prevents CUDA runtime libraries from being installed alongside ROCm.
   * - hipCIM integration
     - WSI whole-slide imaging
-    - MONAI ``WSIReader`` works with ``amd-hipcim`` as the GPU-accelerated whole-slide image backend, which enables GPU patch extraction at scale.
+    - MONAI ``WSIReader`` works with ``amd-hipcim`` as the GPU-accelerated whole-slide image backend for GPU patch extraction.
 
-For validated Model Zoo bundles, see the `MONAI Model Zoo <https://project-monai.github.io/model-zoo.html#/>`_. For installation instructions, see :ref:`installing-monai`. For version-specific changes, see :ref:`monai-whats-new`.
 
 Package information
 ===================
@@ -60,7 +59,7 @@ Package information
   * - Upstream version
     - 1.6.0
   * - Python import
-    - ``import monai`` (unchanged)
+    - ``import monai``
   * - Author
     - AMD Corporation
   * - PyPI index

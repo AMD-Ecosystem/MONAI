@@ -11,7 +11,7 @@
 MONAI on ROCm installation
 ********************************
 
-MONAI on ROCm is installed in a Docker container by either using :ref:`the package manager <package-install>` or by :ref:`building from source <source-install>`.Building from source is only recommended for users who intend to contribute to the project.
+MONAI on ROCm is installed in a Docker container from :ref:`AMD PyPI <package-install>` or by :ref:`building from source <source-install>`. Building from source is intended for contributors.
 
 MONAI on ROCm works with Python 3.12 and depends on NumPy and PyTorch for AMD ROCm with optional dependencies. It supports `AMD-Ecosystem/hipCIM <https://github.com/AMD-Ecosystem/hipCIM>`_ for accelerated image loading and processing on AMD Instinct GPUs.
 
@@ -28,24 +28,24 @@ Launch a Docker container
 
 Before beginning, start a Docker container with the ROCm Ubuntu Docker image from Docker Hub:
 
-.. code-block:: shell
+.. code:: shell
 
-   docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true   \
-     --shm-size=512GB --network=host --device=/dev/kfd        \
-     --device=/dev/dri --group-add video -it                  \
-     -v $HOME:$HOME --name ${LOGNAME}_monai                  \
+   docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true \
+     --shm-size=512GB --network=host --device=/dev/kfd \
+     --device=/dev/dri --group-add video -it \
+     -v $HOME:$HOME --name ${LOGNAME}_monai \
      ubuntu:24.04
 
 MONAI on ROCm is installed in the Docker container. All subsequent commands must be run from within the Docker container.
 
-Set up the environment
-======================
+Setting up the environment
+==========================
 
 Before installing MONAI on ROCm, set up the installation environment.
 
 1. Install required system dependencies.
 
-   .. code-block:: shell
+   .. code:: shell
 
       apt-get update && \
       apt-get install -y --no-install-recommends \
@@ -58,7 +58,7 @@ Before installing MONAI on ROCm, set up the installation environment.
 
 2. Create and activate the development environment.
 
-   .. code-block:: shell
+   .. code:: shell
 
       python3 -m venv /opt/venv
       source /opt/venv/bin/activate
@@ -66,7 +66,7 @@ Before installing MONAI on ROCm, set up the installation environment.
 
 3. Install PyTorch and amd-hipcim for ROCm.
 
-   .. code-block:: shell
+   .. code:: shell
 
       pip install \
           --index-url https://stable.repo.amd.com/rocm/whl-next/ \
@@ -82,7 +82,7 @@ Before installing MONAI on ROCm, set up the installation environment.
 
 4. Set environment variables.
 
-   .. code-block:: shell
+   .. code:: shell
 
       export ROCM_PATH=$(python3 -c "import _rocm_sdk_core, os; print(os.path.dirname(_rocm_sdk_core.__file__))")
       export ROCM_HOME=$ROCM_PATH
@@ -105,17 +105,17 @@ Install MONAI on ROCm from AMD PyPI
 
 From within the Docker container, use these steps to install MONAI on ROCm from AMD PyPI.
 
-1. Install optional dependencies depending on the workload:
+1. Install optional dependencies based on the workload.
 
-   .. code-block:: shell
+   .. code:: shell
 
       pip install ITK nibabel gdown tqdm lmdb psutil pandas einops mlflow \
                   pynrrd clearml transformers pydicom fire ignite         \
                   parameterized tensorboard pytorch-ignite onnx
 
-2. Install NumPy and MONAI on ROCm:
+2. Install NumPy and MONAI on ROCm.
 
-   .. code-block:: shell
+   .. code:: shell
 
       pip install "numpy<2.5,>=1.24"
 
@@ -130,30 +130,31 @@ Build MONAI on ROCm from source
 
 MONAI on ROCm can also be built from source if you intend to contribute to the project. The source build must also be run from within the Docker container.
 
-1. Clone the MONAI on ROCm repository:
+1. Clone the MONAI on ROCm repository.
 
-   .. code-block:: shell
+   .. code:: shell
 
       git clone git@github.com:AMD-Ecosystem/monai.git
       cd monai
 
-2. Set build environment variables:
+2. Set build environment variables.
 
    The ``devel`` extra installed with ``rocm`` during environment setup provides the development packages the build needs.
 
-   .. code-block:: shell
+   .. code:: shell
 
       export ROCM_DEVEL_PATH=$(python3 -c "import _rocm_sdk_devel, os; print(os.path.dirname(_rocm_sdk_devel.__file__))")
       export LIBRARY_PATH=$ROCM_DEVEL_PATH/lib:$ROCM_PATH/lib
       export CPATH=$ROCM_DEVEL_PATH/include:/usr/lib/gcc/x86_64-linux-gnu/13/include:$CPATH
       export PYTORCH_ROCM_ARCH=$AMDGPU_TARGETS
 
+      # Symlinks required by hipcc for GPU bitcode and unversioned .so stubs
       mkdir -p $ROCM_PATH/amdgcn
       ln -sf $ROCM_PATH/lib/llvm/amdgcn/bitcode $ROCM_PATH/amdgcn/bitcode
 
-3. Install development dependencies and build a wheel:
+3. Install development dependencies and build a wheel.
 
-   .. code-block:: shell
+   .. code:: shell
 
       pip install -r requirements-dev.txt -c amd-constraints.txt \
           --index-url https://stable.repo.amd.com/rocm/whl-next/ \
@@ -170,7 +171,7 @@ Verify installation
 
 Verify the MONAI on ROCm installation. Run these commands from within the Docker container.
 
-.. code-block:: shell
+.. code:: shell
 
    python3 -c "import monai; print(monai.__version__)"
 
@@ -186,6 +187,6 @@ Verify the MONAI on ROCm installation. Run these commands from within the Docker
    if torch.cuda.is_available():
        print(f"GPU: {torch.cuda.get_device_name(0)}")
 
-.. code-block:: shell
+.. code:: shell
 
    pip show -v amd-monai

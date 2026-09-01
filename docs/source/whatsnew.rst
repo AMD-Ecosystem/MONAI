@@ -1,7 +1,8 @@
 :github_url: https://github.com/Project-MONAI/MONAI
 
-What's New
-==========
+****************
+What's new
+****************
 
 .. toctree::
    :maxdepth: 1

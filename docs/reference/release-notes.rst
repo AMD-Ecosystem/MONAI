@@ -7,9 +7,9 @@
 
 .. _monai-whats-new:
 
-*****************************
-What's new in MONAI on ROCm
-*****************************
+****************************************
+MONAI on ROCm 1.6.0 release notes
+****************************************
 
 Release information
 ===================
@@ -31,7 +31,7 @@ Release information
   * - Python version
     - 3.12
   * - Supported GPUs
-    - MI300X (gfx942), MI325X (gfx942), MI350X (gfx950), MI355X (gfx950)
+    - MI300X with ``gfx942``, MI325X with ``gfx942``, and MI355X with ``gfx950``
 
 AMD ROCm optimizations
 ======================
@@ -45,7 +45,7 @@ AMD ROCm optimizations
     - Benefit
   * - ``SwinUNETR.WindowAttention``
     - Fused Scaled Dot-Product Attention auto-enabled on ROCm when ``torch.version.hip is not None``
-    - Reduced attention memory overhead and improved SwinUNETR throughput on MI300-class hardware
+    - Uses the fused PyTorch attention path on AMD Instinct GPUs
   * - ``SlidingWindowInferer``
     - ``torch._dynamo.maybe_mark_dynamic(win_data, 0)`` applied on ROCm before each inference window
     - Eliminates repeated graph recompilation across windows with varying batch sizes when ``torch.compile`` is active
@@ -55,12 +55,12 @@ AMD ROCm optimizations
   * - Package dependencies
     - ``amd-constraints.txt`` pins all ``nvidia-cu*`` packages to version 0
     - Prevents CUDA runtime libraries from being installed in ROCm environments and eliminates import-time conflicts
-  * - WSI / hipCIM integration
+  * - WSI and hipCIM integration
     - ``WSIReader(backend="cuCIM")`` validated with ``amd-hipcim`` 26.06.00
     - GPU-accelerated whole-slide image patch extraction on ROCm
   * - MONAI Model Zoo overlays
-    - AMD ROCm overlay configs for five validated bundles
-    - Applies channels_last_3d memory format, BF16 AMP, ``torch.compile``, and device-aware checkpoint loading at runtime without modifying upstream bundle files
+    - AMD ROCm overlay configurations for five validated bundles
+    - Applies ``channels_last_3d`` memory format, BF16 AMP, ``torch.compile``, and device-aware checkpoint loading at runtime without modifying upstream bundle files
   * - EXAONEPath 2.0 on ROCm
     - LGAI Research computational pathology foundation model validated on AMD Instinct GPUs
     - Advanced pathology foundation model support on AMD hardware.
@@ -103,5 +103,5 @@ Known issues
     - MONAI NVTX-based profiling annotations are no-ops on ROCm.
     - Use ``rocprof`` or Omniperf directly for hardware-level profiling.
   * - ``amd-cupy`` requirement
-    - CuPy-based transforms and post-processing require ``amd-cupy`` 14.1.1 or later. Standard NVIDIA CuPy packages are not compatible on ROCm.
+    - CuPy-based transforms and post-processing require ``amd-cupy`` 13.5.1 or later. Standard NVIDIA CuPy packages aren't compatible on ROCm.
     - Install ``amd-cupy`` from AMD PyPI.

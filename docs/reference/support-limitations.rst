@@ -11,7 +11,7 @@
 Supported features and limitations
 ****************************************
 
-The following tables list MONAI capabilities supported in the AMD ROCm release of ``amd-monai`` 1.6.0.
+The tables list MONAI capabilities supported in the AMD ROCm 26.08 release of ``amd-monai`` 1.6.0.
 
 Supported features
 ==================
@@ -42,14 +42,14 @@ Supported features
     - GPU-accelerated transforms
     - Supported for spatial, intensity, and elastic transforms through the PyTorch HIP backend.
   * - Data loading
-    - NIfTI, DICOM, MHA/MHD, PNG/JPEG
+    - NIfTI, DICOM, MHA, MHD, PNG, and JPEG
     - CPU-based I/O with GPU transfer through DataLoader.
   * - Data loading
     - Whole-slide image reading through ``WSIReader``
     - GPU-accelerated with ``amd-hipcim`` backend when ``backend="cuCIM"``.
   * - GPU acceleration
-    - Mixed precision (BF16 / FP16)
-    - BF16 is preferred on MI300X and MI355X through PyTorch AMP with ``torch.amp.autocast``.
+    - Mixed precision (BF16 and FP16)
+    - BF16 is preferred on MI300X and MI355X through PyTorch AMP (``torch.amp.autocast``).
   * - GPU acceleration
     - ``torch.compile`` graph optimization
     - Supported. First-call compilation latency is expected. See :ref:`monai-whats-new`.
@@ -106,7 +106,7 @@ Network architecture support matrix
   * - SwinUNETR
     - Supported
     - Fused SDPA auto-enable
-    - CT/MRI segmentation, whole-body
+    - CT and MRI segmentation, whole-body
   * - DynUNet
     - Supported
     - GEMM-based transpose conv
@@ -139,7 +139,7 @@ Network architecture support matrix
 hipCIM integration example
 ==========================
 
-The following example uses GPU-accelerated whole-slide image I/O through ``amd-hipcim``:
+This example uses GPU-accelerated whole-slide image I/O through ``amd-hipcim``.
 
 .. code-block:: python
 
@@ -152,7 +152,7 @@ The following example uses GPU-accelerated whole-slide image I/O through ``amd-h
 CuPy interoperability example
 =============================
 
-The following example uses ``amd-cupy`` for GPU-to-GPU data transfers without a CPU round trip:
+This example uses ``amd-cupy`` for GPU-to-GPU data transfers without a CPU round trip.
 
 .. code-block:: python
 
