@@ -52,7 +52,7 @@ Supported features
     - BF16 is preferred on MI300X and MI355X through PyTorch AMP (``torch.amp.autocast``).
   * - GPU acceleration
     - ``torch.compile`` graph optimization
-    - Supported. First-call compilation latency is expected. See :ref:`monai-whats-new`.
+    - Supported. First-call compilation latency is expected.
   * - Model Zoo
     - MONAI Bundle format
     - Supported. AMD overlay mechanism adds ROCm optimizations at runtime without modifying upstream bundles.

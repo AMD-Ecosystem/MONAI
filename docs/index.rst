@@ -2,8 +2,8 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 .. meta::
-   :description: MONAI is a domain-optimized, open-source framework based on PyTorch, designed specifically for deep learning in healthcare imaging.
-   :keywords: ROCm-LS, life sciences, MONAI for AMD ROCm documentation, MONAI on ROCm document, AMD MONAI, ROCm MONAI
+  :description: MONAI is a domain-optimized, open-source framework based on PyTorch, designed specifically for deep learning in healthcare imaging.
+  :keywords: ROCm-LS, life sciences, MONAI for AMD ROCm documentation, MONAI on ROCm document, AMD MONAI, ROCm MONAI
 
 .. _index:
 
@@ -11,9 +11,23 @@
 MONAI on ROCm documentation
 *****************************
 
-`The Medical Open Network for AI (MONAI) <https://monai.io/>`_ is a domain-optimized, open-source framework based on PyTorch, explicitly designed for deep learning in healthcare imaging. ``amd-monai`` is AMD's ROCm-enabled port of upstream MONAI, targeting AMD Instinct™ GPUs for inference on ROCm. It is an API-compatible :doc:`HIP <hip:index>` port for use with AMD GPUs. For more information, see :ref:`What is MONAI? <what-is-monai>`
+`Medical Open Network for AI (MONAI) <https://project-monai.github.io/>`_ is a domain-optimized, open-source framework based on PyTorch, explicitly designed for deep learning in healthcare imaging. MONAI on ROCm is a :doc:`HIP <hip:index>` port of MONAI that is API-compatible with upstream MONAI.
 
-The MONAI on ROCm project is located in `AMD-Ecosystem/MONAI <https://github.com/AMD-Ecosystem/MONAI>`_.
+MONAI on ROCm offers open, scalable, and high-performance solutions for life science and healthcare workloads.
+
+The MONAI on ROCm  features:
+
+- Flexible preprocessing for multidimensional medical imaging data.
+
+- Compositional and portable APIs for smooth integration into existing workflows.
+
+- Domain-specific implementations for networks, losses, evaluation metrics, and more.
+
+- Customizable design according to user expertise.
+
+- Multi-GPU multinode data parallelism support.
+
+The code is open and hosted at `<https://github.com/AMD-Ecosystem/MONAI>`_.
 
 .. grid:: 2
   :gutter: 3
@@ -24,12 +38,14 @@ The MONAI on ROCm project is located in `AMD-Ecosystem/MONAI <https://github.com
 
   .. grid-item-card:: Reference
 
-    * :ref:`Release notes <monai-whats-new>`
     * :ref:`monai-features`
+
+  .. grid-item-card:: Related content
+
+    * `MONAI on ROCm blog <https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html>`_
 
 To contribute to MONAI on ROCm, refer to
 `Contributing to MONAI on ROCm <https://github.com/AMD-Ecosystem/MONAI/blob/main/CONTRIBUTING.md>`_.
 
 You can find licensing information on the
 :doc:`Licensing <license>` page.
-

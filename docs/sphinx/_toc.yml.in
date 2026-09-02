@@ -9,19 +9,18 @@ defaults:
 root: index
 subtrees:
 
-- entries:
-  - file: what-is-monai
-    title: What is MONAI?
-
 - caption: Install
   entries:
   - file: install/installation
 
 - caption: Reference
   entries:
-  - file: reference/release-notes
-    title: Release notes
   - file: reference/support-limitations
+
+- caption: Related content
+  entries:
+  - url: https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html
+    title: MONAI on ROCm blog
 
 - caption: About
   entries:
