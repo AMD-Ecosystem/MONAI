@@ -11,22 +11,38 @@
 MONAI on ROCm installation
 ********************************
 
-MONAI on ROCm is installed in a Docker container from :ref:`AMD PyPI <package-install>` or by :ref:`building from source <source-install>`. Building from source is intended for contributors.
+To install MONAI on ROCm, you have the following options:
 
-MONAI on ROCm works with Python 3.12 and depends on NumPy and PyTorch for AMD ROCm with optional dependencies. It supports `AMD-Ecosystem/hipCIM <https://github.com/AMD-Ecosystem/hipCIM>`_ for accelerated image loading and processing on AMD Instinct GPUs.
+- :ref:`Use package manager <package-install>` (recommended)
 
-System environment:
+- :ref:`Build from source <source-install>`
 
-+--------------+----------------+----------------+------------------------------------------+
-| ROCm version | Ubuntu version | Python version | AMD Instinct™ GPU (tested)               |
-+==============+================+================+==========================================+
-| 10.0.0       | 24.04          | 3.12           | MI300X, MI325X, MI355X                   |
-+--------------+----------------+----------------+------------------------------------------+
+System requirements
+====================
 
-Launch a Docker container
-===========================
+.. list-table::
+   :header-rows: 1
 
-Before beginning, start a Docker container with the ROCm Ubuntu Docker image from Docker Hub:
+   * - ROCm version
+     - Ubuntu version
+     - Python version
+     - AMD Instinct™ GPU
+     - PyTorch for AMD ROCm version
+     - Numpy version     
+   
+   * - 10.0.0
+     - 24.04
+     - 3.12
+     - MI300X, MI325X, or MI355X
+     - ROCm-enabled PyTorch (ships with ROCm)
+     - No earlier than 1.24 and no later than 2.4
+
+For the complete list of dependencies, see the `requirements.txt <https://github.com/AMD-Ecosystem/MONAI/blob/main/requirements.txt>`_ file.
+
+Setting up the environment
+====================================
+
+1. Start a Docker container with the ROCm Ubuntu Docker image from Docker Hub:
 
 .. code:: shell
 
@@ -36,14 +52,9 @@ Before beginning, start a Docker container with the ROCm Ubuntu Docker image fro
      -v $HOME:$HOME --name ${LOGNAME}_monai \
      ubuntu:24.04
 
-MONAI on ROCm is installed in the Docker container. All subsequent commands must be run from within the Docker container.
+   MONAI on ROCm is installed in the Docker container. All subsequent commands must be run from within the Docker container.
 
-Setting up the environment
-==========================
-
-Before installing MONAI on ROCm, set up the installation environment.
-
-1. Install required system dependencies.
+2. Install required system dependencies.
 
    .. code:: shell
 
@@ -56,7 +67,7 @@ Before installing MONAI on ROCm, set up the installation environment.
         libopenslide-dev libwebp-dev libzstd-dev && \
       rm -rf /var/lib/apt/lists/*
 
-2. Create and activate the development environment.
+3. Create and activate the development environment.
 
    .. code:: shell
 
@@ -64,7 +75,7 @@ Before installing MONAI on ROCm, set up the installation environment.
       source /opt/venv/bin/activate
       pip install --upgrade pip
 
-3. Install PyTorch and amd-hipcim for ROCm.
+4. Install PyTorch and amd-hipcim for ROCm.
 
    .. code:: shell
 
@@ -80,7 +91,7 @@ Before installing MONAI on ROCm, set up the installation environment.
 
       rocm-sdk init
 
-4. Set environment variables.
+5. Set environment variables.
 
    .. code:: shell
 
@@ -100,8 +111,8 @@ Before installing MONAI on ROCm, set up the installation environment.
 
 .. _package-install:
 
-Install MONAI on ROCm from AMD PyPI
-===================================
+Installing using package manager
+====================================
 
 From within the Docker container, use these steps to install MONAI on ROCm from AMD PyPI.
 
@@ -125,10 +136,10 @@ From within the Docker container, use these steps to install MONAI on ROCm from 
 
 .. _source-install:
 
-Build MONAI on ROCm from source
+Building from source
 ===============================
 
-MONAI on ROCm can also be built from source if you intend to contribute to the project. The source build must also be run from within the Docker container.
+To build MONAI on ROCm from source, follow the steps given in this section.
 
 1. Clone the MONAI on ROCm repository.
 
@@ -137,7 +148,7 @@ MONAI on ROCm can also be built from source if you intend to contribute to the p
       git clone git@github.com:AMD-Ecosystem/monai.git
       cd monai
 
-2. Set build environment variables.
+2. Set environment variables.
 
    The ``devel`` extra installed with ``rocm`` during environment setup provides the development packages the build needs.
 

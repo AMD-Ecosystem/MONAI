@@ -11,11 +11,13 @@
 MONAI on ROCm documentation
 *****************************
 
-`Medical Open Network for AI (MONAI) <https://project-monai.github.io/>`_ is a domain-optimized, open-source framework based on PyTorch, explicitly designed for deep learning in healthcare imaging. MONAI on ROCm is a :doc:`HIP <hip:index>` port of MONAI that is API-compatible with upstream MONAI.
+The Medical Open Network for AI (MONAI) is a domain-optimized, open-source framework based on PyTorch, explicitly designed for deep learning in healthcare imaging. MONAI 1.6.0 on ROCm is a :doc:`HIP <hip:index>` port of `MONAI upstream version 1.6.0 <https://monai.readthedocs.io/en/stable/whatsnew_1_6_0.html>`_. It is API-compatible with upstream MONAI without requiring any code changes.
+
+MONAI on ROCm, a ROCm-enabled version of `MONAI <https://project-monai.github.io/>`_, is built on top of `PyTorch for AMD ROCm <https://pytorch.org/blog/pytorch-for-amd-rocm-platform-now-available-as-python-package/>`_, helping healthcare and life science innovators to leverage GPU acceleration with AMD Instinct™ GPUs for high-performance inference and training of medical AI applications.
 
 MONAI on ROCm offers open, scalable, and high-performance solutions for life science and healthcare workloads.
 
-The MONAI on ROCm  features:
+The MONAI on ROCm key features include:
 
 - Flexible preprocessing for multidimensional medical imaging data.
 
@@ -29,6 +31,8 @@ The MONAI on ROCm  features:
 
 The code is open and hosted at `<https://github.com/AMD-Ecosystem/MONAI>`_.
 
+The documentation is structured as follows:
+
 .. grid:: 2
   :gutter: 3
 
@@ -39,6 +43,7 @@ The code is open and hosted at `<https://github.com/AMD-Ecosystem/MONAI>`_.
   .. grid-item-card:: Reference
 
     * :ref:`monai-features`
+    * `MONAI Model Zoo on ROCm <https://advanced-micro-devices-demo--3.com.readthedocs.build/projects/model-zoo-internal/en/3/>`_
 
   .. grid-item-card:: Related content
 
