@@ -39,7 +39,7 @@ there exists a non-null value mapped to docs_header_version, then the header in
 the documentation page will contain the given version string.
 '''
 html_context = {
-    "docs_header_version": "26.03"
+    "docs_header_version": "26.08"
 }
 
 
@@ -49,10 +49,10 @@ all_article_info_os = ["linux"]
 all_article_info_author = ""
 
 # Dynamically extract component version
-version_number = "1.5.2"
+version_number = "1.6.0"
 
 # for PDF output on Read the Docs
-project = "MONAI 1.5.2 on ROCm"
+project = "MONAI 1.6.0 on ROCm"
 author = "Advanced Micro Devices, Inc."
 copyright = "Copyright (c) 2026 Advanced Micro Devices, Inc. All rights reserved."
 version = version_number

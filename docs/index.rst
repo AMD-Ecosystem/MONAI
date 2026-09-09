@@ -43,7 +43,7 @@ The documentation is structured as follows:
   .. grid-item-card:: Reference
 
     * :ref:`monai-features`
-    * :ref:`model-zoo`
+    * `MONAI Model Zoo on ROCm <https://advanced-micro-devices-demo--3.com.readthedocs.build/projects/model-zoo-internal/en/3/>`_
 
   .. grid-item-card:: Related content
 
