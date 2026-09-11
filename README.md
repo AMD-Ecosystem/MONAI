@@ -30,9 +30,7 @@ MONAI for AMD ROCm works with Python 3.12, and depends directly on NumPy and [Py
 
 ## Installation
 
-MONAI for AMD ROCm targets a ROCm 7.14 runtime (for example, the
-`rocm/pytorch:rocm7.14_ubuntu24.04_py3.12_pytorch_release_2.12.0` image, which ships
-PyTorch and Python 3.12). Install [the current release](https://pypi.amd.com/rocm-10.0.0/simple/amd-monai/)
+MONAI for AMD ROCm targets a ROCm 10.0.0 runtime. Install [the current release](https://pypi.amd.com/rocm-10.0.0/simple/amd-monai/)
 from the AMD PyPI index:
 
 ```
