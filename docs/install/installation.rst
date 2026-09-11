@@ -8,7 +8,7 @@
 .. _installing-monai:
 
 ********************************
-MONAI on ROCm installation
+Installing MONAI on ROCm 
 ********************************
 
 To install MONAI on ROCm, you have the following options:
