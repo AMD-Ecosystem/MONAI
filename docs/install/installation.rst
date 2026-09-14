@@ -44,13 +44,13 @@ Setting up the environment
 
 1. Start a Docker container with the ROCm Ubuntu Docker image from Docker Hub:
 
-.. code:: shell
+   .. code:: shell
 
-   docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true \
-     --shm-size=512GB --network=host --device=/dev/kfd \
-     --device=/dev/dri --group-add video -it \
-     -v $HOME:$HOME --name ${LOGNAME}_monai \
-     ubuntu:24.04
+      docker run --cap-add=SYS_PTRACE --ipc=host --privileged=true \
+      --shm-size=512GB --network=host --device=/dev/kfd \
+      --device=/dev/dri --group-add video -it \
+      -v $HOME:$HOME --name ${LOGNAME}_monai \
+      ubuntu:24.04
 
    MONAI on ROCm is installed in the Docker container. All subsequent commands must be run from within the Docker container.
 
