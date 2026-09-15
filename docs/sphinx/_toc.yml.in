@@ -16,7 +16,7 @@ subtrees:
 - caption: Reference
   entries:
   - file: reference/support-limitations
-  - url: https://rocm.docs.amd.com/projects/model-zoo-internal/en/amd-integration/
+  - url: https://rocm.docs.amd.com/projects/monai-model-zoo/en/latest/
     title: MONAI Model Zoo on ROCm
 
 - caption: Related content

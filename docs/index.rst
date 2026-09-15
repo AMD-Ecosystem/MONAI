@@ -43,7 +43,7 @@ The documentation is structured as follows:
   .. grid-item-card:: Reference
 
     * :ref:`monai-features`
-    * `MONAI Model Zoo on ROCm <https://rocm.docs.amd.com/projects/model-zoo-internal/en/amd-integration/>`_
+    * `MONAI Model Zoo on ROCm <https://rocm.docs.amd.com/projects/monai-model-zoo/en/latest/>`_
 
   .. grid-item-card:: Related content
 
