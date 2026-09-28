@@ -50,7 +50,7 @@ The documentation is structured as follows:
     * `MONAI on ROCm blog <https://rocm.blogs.amd.com/artificial-intelligence/monai-rocm/README.html>`_
 
 To contribute to MONAI on ROCm, refer to
-`Contributing to MONAI on ROCm <https://github.com/AMD-Ecosystem/MONAI/blob/main/CONTRIBUTING.md>`_.
+`Contributing to MONAI on ROCm <https://github.com/AMD-Ecosystem/MONAI/blob/amd-develop/CONTRIBUTING.md>`_.
 
 You can find licensing information on the
 :doc:`Licensing <license>` page.

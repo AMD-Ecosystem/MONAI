@@ -37,7 +37,7 @@ System requirements
      - ROCm-enabled PyTorch (ships with ROCm)
      - No earlier than 1.24 and no later than 2.4
 
-For the complete list of dependencies, see the `requirements.txt <https://github.com/AMD-Ecosystem/MONAI/blob/main/requirements.txt>`_ file.
+For the complete list of dependencies, see the `requirements.txt <https://github.com/AMD-Ecosystem/MONAI/blob/amd-develop/requirements.txt>`_ file.
 
 Setting up the environment
 ====================================
