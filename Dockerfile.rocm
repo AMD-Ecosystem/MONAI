@@ -104,7 +104,7 @@ ENV BUILD_MONAI=1
 # than no image at all.
 ARG HIPCIM_INDEX_URL="https://pypi.amd.com/rocm-${ROCM_SERIES}.0/simple/"
 RUN if [ -n "${HIPCIM_INDEX_URL}" ]; then \
-      pip install --no-cache-dir --extra-index-url "${HIPCIM_INDEX_URL}" "amd-hipcim" \
+      pip install --no-cache-dir --extra-index-url "${HIPCIM_INDEX_URL}" "amd-hipcim>=26.6.0" \
       && python -c "from cucim import CuImage"; \
     else \
       echo "hipCIM not installed; whole-slide-image (cucim) backends are unavailable."; \

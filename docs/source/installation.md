@@ -77,10 +77,10 @@ pip install monai
 MONAI supports the extras syntax such as `pip install 'monai[nibabel]'`. The options are
 
 ```text
-clearml, cucim, cupy, einops, fire, gdown, h5py, huggingface_hub, hyena, ignite, imagecodecs, itk, jsonschema, lmdb, lpips, matplotlib, metrics_reloaded, mlflow, nibabel, nni, nvimgcodec, onnx, openslide, optuna, pandas, pillow, polygraphy, psutil, pyamg, pybind11, pydicom, pynrrd, pynvml, pyyaml, requests, segment_anything, scipy, skimage, tensorboard, tensorboardX, tifffile, torchio, torchvision, tqdm, transformers, zarr
+clearml, cucim, cupy, einops, fire, gdown, h5py, huggingface_hub, hyena, ignite, imagecodecs, itk, jsonschema, lmdb, lpips, matplotlib, metrics_reloaded, mlflow, nibabel, nni, nvimgcodec, onnx, openslide, optuna, pandas, pillow, polygraphy, psutil, pyamg, pybind11, pydicom, pynrrd, pynvml, pyyaml, requests, rocm, segment_anything, scipy, skimage, tensorboard, tensorboardX, tifffile, torchio, torchvision, tqdm, transformers, zarr
 ```
 
-which correspond to the packages: `clearml`, `cucim` (`cucim-cu12` or `cucim-cu13`), `cupy-cuda13x`, `einops`, `fire`, `gdown`, `h5py`, `huggingface_hub`, `nvsubquadratic`, `omegaconf`, `pytorch-ignite`, `imagecodecs`, `itk`, `jsonschema`, `lmdb`, `lpips`, `matplotlib`, `MetricsReloaded`, `mlflow`, `nibabel`, `nni`, `filelock`, `nvidia-nvimgcodec-cu13`, `onnx`, `onnxruntime`, `onnx_graphsurgeon`, `onnxscript`, `openslide-python`, `openslide-bin`, `optuna`, `pandas`, `pillow`, `polygraphy`, `psutil`, `pyamg`, `pybind11`, `pydicom`, `pynrrd`, `nvidia-ml-py`, `pyyaml`, `requests`, `segment_anything`, `scipy`, `scikit-image`, `tensorboard`, `tensorboardX`, `tifffile`, `torchio`, `torchvision`, `tqdm`, `transformers`, `zarr`.
+which correspond to the packages: `clearml`, `cucim` (`cucim-cu12` or `cucim-cu13`), `cupy-cuda13x`, `einops`, `fire`, `gdown`, `h5py`, `huggingface_hub`, `nvsubquadratic`, `omegaconf`, `pytorch-ignite`, `imagecodecs`, `itk`, `jsonschema`, `lmdb`, `lpips`, `matplotlib`, `MetricsReloaded`, `mlflow`, `nibabel`, `nni`, `filelock`, `nvidia-nvimgcodec-cu13`, `onnx`, `onnxruntime`, `onnx_graphsurgeon`, `onnxscript`, `openslide-python`, `openslide-bin`, `optuna`, `pandas`, `pillow`, `polygraphy`, `psutil`, `pyamg`, `pybind11`, `pydicom`, `pynrrd`, `nvidia-ml-py`, `pyyaml`, `requests`, `amd-hipcim`, `segment_anything`, `scipy`, `scikit-image`, `tensorboard`, `tensorboardX`, `tifffile`, `torchio`, `torchvision`, `tqdm`, `transformers`, `zarr`.
 
 Almost all of these can be installed together with the `all` option. For development on MONAI, this should be accompanied by `testing` which will install the testing static checking packages. Cupy and `nvimgcodec` are omitted from `all` since the choice between
 Cuda 12 and 13 versions of the libraries can't be resolved when installing and must be manually installed.
@@ -88,6 +88,30 @@ Cuda 12 and 13 versions of the libraries can't be resolved when installing and m
 The `nvimgcodec` extra installs GPU-accelerated DICOM decoding for `NvImgCodecPydicomReader`
 (`pip install 'monai[nvimgcodec]'`). It is Linux-only in the extra definition; CUDA 13 is the
 default. CUDA 12 users should install matching `cupy-cuda12x` and `nvidia-nvimgcodec-cu12` wheels.
+
+The `rocm` extra provides the AMD ROCm counterparts of the CUDA-only imaging dependencies:
+[`amd-hipcim`](https://rocm.docs.amd.com/projects/hipCIM/en/latest/) (hipCIM), which pulls
+`amd-cupy` in transitively. `amd-hipcim` ships the `cucim` Python namespace, so all existing MONAI
+code that imports from `cucim` (e.g. `WSIReader` with `backend="cucim"`) works on ROCm without any
+code changes. This extra covers MONAI's optional imaging dependencies only: a ROCm build of PyTorch
+and the matching ROCm runtime must already be installed, see
+[PyTorch on ROCm](https://rocm.docs.amd.com/projects/ai-ecosystem/en/latest/frameworks/pytorch/install.html).
+Both `amd-hipcim` and `amd-cupy` are published on AMD's package index rather than PyPI, so an extra
+index URL matching your ROCm series is required:
+
+```bash
+pip install --extra-index-url https://pypi.amd.com/rocm-10.0.0/simple/ 'monai[rocm]'
+```
+
+AMD currently publishes these wheels for CPython 3.12 on x86_64 Linux only; on other interpreters or
+architectures the install fails with `No matching distribution found for amd-hipcim`.
+
+Do not use `monai[all]` on ROCm: the `all` extra includes CUDA-only sub-extras (`cucim`, `cupy`,
+`nvimgcodec`, `pynvml`, `hyena`) that pull in `cupy-cuda13x`, `cuda-toolkit`, and a cascade of
+`nvidia-*` packages that will not work on ROCm. `Dockerfile.rocm` in the repo root shows how to
+install the full optional dependency set on ROCm while filtering those packages — follow it as the
+authoritative reference for the complete environment setup (library paths, compiler flags,
+`rocm-sdk init`, and the full container recipe).
 
 The `hyena` extra pulls in [`nvsubquadratic`](https://github.com/NVIDIA-BioNeMo/nvSubquadratic),
 required by `HyenaNDUNETR` / `HyenaMixer` / `HyenaTransformerBlock` (subquadratic
@@ -333,8 +357,10 @@ MONAI itself:
 ```bash
 git clone https://github.com/Project-MONAI/MONAI.git
 cd MONAI/
-python monai/config/print_dependencies.py \* > requirements.txt
+python monai/config/print_dependencies.py all testing > requirements.txt
 pip install -r requirements.txt
+# Note: `all testing` is used rather than `*` because `*` now also includes the `rocm` extra,
+# which requires AMD's package index and is not resolvable from PyPI.
 ```
 
 To install all optional dependencies with `conda` based on MONAI development environment settings (`environment-dev.yml`;

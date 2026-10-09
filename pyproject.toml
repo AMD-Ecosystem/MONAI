@@ -155,6 +155,10 @@ pynrrd = ["pynrrd"]
 pynvml = ["nvidia-ml-py"]
 pyyaml = ["pyyaml"]
 requests = ["requests"]
+# hipCIM is the ROCm counterpart of `cucim`; it pulls `amd-cupy` in transitively. Omitted from `all`:
+# the real wheels live on AMD's package index, not PyPI, so an `--extra-index-url` is needed (see
+# installation.md). The floor pins the first AMD-index release, skipping the PyPI placeholder stub.
+rocm = ["amd-hipcim>=26.6.0; platform_system == 'Linux'"]
 # per #5882 this requirement must be on one line to get removed by sed in weekly-preview.yml
 segment_anything = ["segment_anything @ git+https://github.com/facebookresearch/segment-anything.git@6fdee8f2727f4506cfbbe553e23b895e27956588"]
 scipy = ["scipy>=1.12.0"]
