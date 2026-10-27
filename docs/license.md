@@ -1,6 +1,6 @@
 # License
 
-The `amd-monai` package is an AMD port of [Project MONAI](https://github.com/Project-MONAI/MONAI). The package uses the Apache License 2.0 and preserves upstream copyright headers and license terms.
+The `monai` package is an AMD port of [Project MONAI](https://github.com/Project-MONAI/MONAI). The package uses the Apache License 2.0 and preserves upstream copyright headers and license terms.
 
 ```{include} ../LICENSE
 ```
