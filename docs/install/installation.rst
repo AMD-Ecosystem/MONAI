@@ -130,7 +130,7 @@ From within the Docker container, use these steps to install MONAI on ROCm from 
 
       pip install "numpy<2.5,>=1.24"
 
-      pip install --no-deps amd-monai \
+      pip install --no-deps monai \
           --index-url https://stable.repo.amd.com/rocm/whl-next/ \
           --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple/
 
@@ -173,7 +173,7 @@ To build MONAI on ROCm from source, follow the steps given in this section.
           --build-constraint amd-constraints.txt
 
       BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py bdist_wheel
-      pip install --no-deps dist/amd_monai-*.whl
+      pip install --no-deps dist/monai-*.whl
 
    The wheel file is generated under the ``dist`` directory.
 
@@ -200,4 +200,4 @@ Verify the MONAI on ROCm installation. Run these commands from within the Docker
 
 .. code:: shell
 
-   pip show -v amd-monai
+   pip show -v monai
