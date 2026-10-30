@@ -81,7 +81,7 @@ RUN pip install --no-cache-dir \
     -r requirements-dev.txt -c amd-constraints.txt --build-constraint amd-constraints.txt
 
 RUN BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py bdist_wheel \
-    && pip install --no-cache-dir dist/amd_monai-*.whl
+    && pip install --no-cache-dir dist/monai-*.whl
 
 RUN python3 -c "import torch; print('✓ torch:', torch.__version__)" \
     && python3 -c "import monai; print('✓ monai:', monai.__version__)"

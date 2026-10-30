@@ -11,7 +11,7 @@
 Supported features and limitations
 ****************************************
 
-The tables list MONAI capabilities supported in the AMD ROCm 26.08 release of ``amd-monai`` 1.6.0.
+The tables list MONAI capabilities supported in the AMD ROCm 26.08 release of ``monai`` 1.6.0.
 
 Supported features
 ==================
@@ -66,8 +66,8 @@ Supported features
     - NumPy, ITK, SimpleITK array conversions
     - Supported through the CPU bridge.
   * - Interoperability
-    - ``amd-cupy``
-    - Supported with ``amd-cupy`` 14.1.1 or later.
+    - ``cupy``
+    - Supported with ``cupy`` 14.1.1 or later.
   * - Foundation model
     - EXAONEPath 2.0
     - Computational pathology foundation model validated on AMD hardware. ViT-based WSI patch inference through Hugging Face.
@@ -86,7 +86,7 @@ Limitations
   * - rocTX and NVTX profiling markers
     - MONAI NVTX-based profiling annotations are not functional on ROCm. Use ``rocprof`` or Omniperf directly.
   * - CuPy version
-    - Requires ``amd-cupy`` 14.1.1 or later. Standard NVIDIA CuPy packages are not compatible on ROCm.
+    - Requires ``cupy`` 14.1.1 or later. Standard NVIDIA CuPy packages are not compatible on ROCm.
   * - hipCIM version
     - WSI support requires ``amd-hipcim`` 26.06.00 or later.
   * - ``torch.compile`` first-call latency

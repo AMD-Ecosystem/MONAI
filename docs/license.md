@@ -1,6 +1,6 @@
 # License
 
-The `amd-monai` package is an AMD port of [Project MONAI](https://github.com/Project-MONAI/MONAI). The package uses the Apache License 2.0 and preserves upstream copyright headers and license terms.
+The `monai` package is an AMD port of [Project MONAI](https://github.com/Project-MONAI/MONAI). The package uses the Apache License 2.0 and preserves upstream copyright headers and license terms.
 
 ```{include} ../LICENSE
 ```
@@ -16,7 +16,7 @@ The `amd-monai` package is an AMD port of [Project MONAI](https://github.com/Pro
 | ITK | Apache 2.0 | Image input and output |
 | scikit-image | BSD 3-Clause | Image processing utilities |
 | amd-hipcim | Apache 2.0 | GPU whole-slide image input and output |
-| amd-cupy | MIT | Optional CuPy-compatible GPU arrays for ROCm |
+| cupy | MIT | Optional CuPy-compatible GPU arrays for ROCm |
 | Pillow | HPND | Image format support |
 | einops | MIT | Tensor rearrangement |
 
