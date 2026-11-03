@@ -1,4 +1,4 @@
-name: amd-monai
+name: monai
 channels:
   - pytorch
   - defaults
