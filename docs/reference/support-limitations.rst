@@ -11,7 +11,7 @@
 Supported features and limitations
 ****************************************
 
-The tables list MONAI capabilities supported in the AMD ROCm 26.08 release of ``amd-monai`` 1.6.0.
+The tables list MONAI capabilities supported in the AMD ROCm 26.08 release of ``monai`` 1.6.0.
 
 Supported features
 ==================
