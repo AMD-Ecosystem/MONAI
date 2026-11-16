@@ -24,6 +24,8 @@ import monai.networks.nets.senet as se_mod
 from monai.networks import eval_mode
 from monai.networks.nets import SENet, SENet154, SEResNet50, SEResNet101, SEResNet152, SEResNext50, SEResNext101
 from monai.utils import optional_import
+from urllib.error import URLError
+
 from tests.test_utils import test_is_quick, test_pretrained_networks, test_script_save, testing_data_config
 
 if TYPE_CHECKING:
@@ -82,9 +84,9 @@ class TestPretrainedSENET(unittest.TestCase):
         if not replace_url:
             try:
                 SEResNet50(pretrained=True, spatial_dims=2, in_channels=3, num_classes=2)
-            except OSError as rt_e:
+            except (OSError, URLError) as rt_e:
                 print(rt_e)
-                if "certificate" in str(rt_e):  # [SSL: CERTIFICATE_VERIFY_FAILED]
+                if "certificate" in str(rt_e) or isinstance(rt_e, URLError):
                     replace_url = True
         if replace_url:
             testing_dir = Path(__file__).parents[2] / "testing_data"
