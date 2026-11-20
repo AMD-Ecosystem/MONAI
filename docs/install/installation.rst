@@ -42,7 +42,7 @@ For the complete list of dependencies, see the `requirements.txt <https://github
 Setting up the environment
 ====================================
 
-1. Start a Docker container with the ROCm Ubuntu Docker image from Docker Hub:
+1. Start a Docker container with the Ubuntu 24.04 image from Docker Hub:
 
    .. code:: shell
 
@@ -51,6 +51,11 @@ Setting up the environment
       --device=/dev/dri --group-add video -it \
       -v $HOME:$HOME --name ${LOGNAME}_monai \
       ubuntu:24.04
+
+   .. note::
+
+      This is a plain Ubuntu image and does not include ROCm. The ROCm runtime is
+      installed inside the container as pip packages in step 4.
 
    MONAI on ROCm is installed in the Docker container. All subsequent commands must be run from within the Docker container.
 
@@ -75,7 +80,7 @@ Setting up the environment
       source /opt/venv/bin/activate
       pip install --upgrade pip
 
-4. Install PyTorch and amd-hipcim for ROCm.
+4. Install ROCm, PyTorch, and amd-hipcim.
 
    .. code:: shell
 
