@@ -42,7 +42,7 @@ For the complete list of dependencies, see the `requirements.txt <https://github
 Setting up the environment
 ====================================
 
-1. Start a Docker container with the ROCm Ubuntu Docker image from Docker Hub:
+1. Start a Docker container with the Ubuntu 24.04 image from Docker Hub:
 
    .. code:: shell
 
@@ -51,6 +51,11 @@ Setting up the environment
       --device=/dev/dri --group-add video -it \
       -v $HOME:$HOME --name ${LOGNAME}_monai \
       ubuntu:24.04
+
+   .. note::
+
+      This is a plain Ubuntu image and does not include ROCm. The ROCm runtime is
+      installed inside the container as pip packages in step 4.
 
    MONAI on ROCm is installed in the Docker container. All subsequent commands must be run from within the Docker container.
 
@@ -75,7 +80,7 @@ Setting up the environment
       source /opt/venv/bin/activate
       pip install --upgrade pip
 
-4. Install PyTorch and amd-hipcim for ROCm.
+4. Install ROCm, PyTorch, and amd-hipcim.
 
    .. code:: shell
 
@@ -130,7 +135,7 @@ From within the Docker container, use these steps to install MONAI on ROCm from 
 
       pip install "numpy<2.5,>=1.24"
 
-      pip install --no-deps amd-monai \
+      pip install --no-deps monai \
           --index-url https://stable.repo.amd.com/rocm/whl-next/ \
           --extra-index-url=https://pypi.amd.com/rocm-10.0.0/simple/
 
@@ -173,7 +178,7 @@ To build MONAI on ROCm from source, follow the steps given in this section.
           --build-constraint amd-constraints.txt
 
       BUILD_MONAI=1 FORCE_CUDA=1 python3 setup.py bdist_wheel
-      pip install --no-deps dist/amd_monai-*.whl
+      pip install --no-deps dist/monai-*.whl
 
    The wheel file is generated under the ``dist`` directory.
 
@@ -200,4 +205,4 @@ Verify the MONAI on ROCm installation. Run these commands from within the Docker
 
 .. code:: shell
 
-   pip show -v amd-monai
+   pip show -v monai
